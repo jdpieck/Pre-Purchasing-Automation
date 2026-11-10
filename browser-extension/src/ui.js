@@ -7,16 +7,18 @@
   'use strict';
 
   // Prevent multiple injections
-  if (window.__ucd_prepurchasing_autofill_injected) return;
-  window.__ucd_prepurchasing_autofill_injected = true;
+  if (typeof window !== 'undefined') {
+    if (window.__ucd_prepurchasing_autofill_injected) return;
+    window.__ucd_prepurchasing_autofill_injected = true;
+  }
 
-  const ICONS = window.ICONS || {};
-  const getSettings = window.getSettings;
-  const saveSettings = window.saveSettings;
-  const DEFAULT_SETTINGS = window.DEFAULT_SETTINGS;
-  const STORAGE_KEY = window.STORAGE_KEY;
-  const parseCSV = window.parseCSV;
-  const fillPrePurchasingForm = window.fillPrePurchasingForm;
+  const ICONS = (typeof window !== 'undefined' ? window.ICONS : (typeof global !== 'undefined' ? global.ICONS : null)) || {};
+  const getSettings = typeof window !== 'undefined' ? window.getSettings : (typeof global !== 'undefined' ? global.getSettings : null);
+  const saveSettings = typeof window !== 'undefined' ? window.saveSettings : (typeof global !== 'undefined' ? global.saveSettings : null);
+  const DEFAULT_SETTINGS = typeof window !== 'undefined' ? window.DEFAULT_SETTINGS : (typeof global !== 'undefined' ? global.DEFAULT_SETTINGS : null);
+  const STORAGE_KEY = typeof window !== 'undefined' ? window.STORAGE_KEY : (typeof global !== 'undefined' ? global.STORAGE_KEY : null);
+  const parseCSV = typeof window !== 'undefined' ? window.parseCSV : (typeof global !== 'undefined' ? global.parseCSV : null);
+  const fillPrePurchasingForm = typeof window !== 'undefined' ? window.fillPrePurchasingForm : (typeof global !== 'undefined' ? global.fillPrePurchasingForm : null);
 
   function injectUI() {
     if (document.getElementById('ucd-autofill-root')) return;
@@ -61,6 +63,14 @@
     const previewItemTally = document.getElementById('preview-item-tally');
     const onboardingBanner = document.getElementById('ucd-onboarding-banner');
     const gotoSettingsBtn = document.getElementById('ucd-goto-settings-btn');
+    const vendorSection = document.getElementById('ucd-vendor-section');
+    const vendorFilterBar = document.getElementById('ucd-vendor-filter-bar');
+    const vendorWarningText = document.getElementById('ucd-vendor-warning-text');
+    const dateOffsetInput = document.getElementById('setting-dateOffsetDays');
+    const datePreviewLabel = document.getElementById('ucd-date-preview-label');
+
+    let selectedVendorFilter = '__all__';
+    let activeFilteredItems = [];
 
     let settingsStatusTimer = null;
     function showSettingsStatus(msg, type = 'success') {
@@ -201,6 +211,17 @@
     }
 
     // Populate Settings UI
+    function updateDatePreview(offsetDays) {
+      if (!datePreviewLabel) return;
+      const days = parseInt(offsetDays, 10);
+      const validDays = Number.isNaN(days) ? 7 : Math.max(1, Math.min(60, days));
+      const getFutureDateFn = window.getFutureDate || (typeof getFutureDate === 'function' ? getFutureDate : null);
+      if (getFutureDateFn) {
+        const dateStr = getFutureDateFn(validDays);
+        datePreviewLabel.textContent = `Fills with: ${dateStr} (${validDays} day${validDays === 1 ? '' : 's'} from today)`;
+      }
+    }
+
     function populateSettingsUI() {
       settings = getSettings();
       document.getElementById('setting-deliverTo').value = settings.deliverTo || '';
@@ -214,12 +235,20 @@
       document.getElementById('setting-allowBackorder').checked = !!settings.allowBackorder;
       document.getElementById('setting-defaultJustification').value = settings.defaultJustification || '';
 
+      updateDatePreview(settings.dateOffsetDays || 7);
+
       if (onboardingBanner) {
         onboardingBanner.style.display = settings.deliverTo ? 'none' : 'flex';
       }
     }
 
     populateSettingsUI();
+
+    if (dateOffsetInput) {
+      dateOffsetInput.addEventListener('input', () => {
+        updateDatePreview(dateOffsetInput.value);
+      });
+    }
 
     // Auto-save settings on leaving field (blur) or changing value (change)
     const settingFieldSpecs = [
@@ -371,10 +400,13 @@
 
     function resetUploadedFile() {
       currentParsedItems = [];
+      activeFilteredItems = [];
+      selectedVendorFilter = '__all__';
       currentFileName = "";
       fileInput.value = "";
       pasteInput.value = "";
       summarySection.style.display = "none";
+      if (vendorSection) vendorSection.style.display = "none";
       fileCard.style.display = "none";
       importInputContainer.style.display = "flex";
       statusBox.className = "ucd-status-box";
@@ -382,6 +414,107 @@
     }
 
     clearFileBtn.addEventListener('click', resetUploadedFile);
+
+    function getVendorCounts(items) {
+      const counts = new Map();
+      items.forEach(item => {
+        const v = (item.vendor || '').trim();
+        const displayVendor = v || 'Unspecified';
+        counts.set(displayVendor, (counts.get(displayVendor) || 0) + 1);
+      });
+      return counts;
+    }
+
+    function renderVendorFilterPills(uniqueVendors, vendorCounts, totalCount) {
+      if (!vendorFilterBar) return;
+      vendorFilterBar.innerHTML = '';
+
+      const allBtn = document.createElement('button');
+      allBtn.type = 'button';
+      allBtn.className = `ucd-vendor-pill ${selectedVendorFilter === '__all__' ? 'active' : ''}`;
+      allBtn.textContent = `All Vendors (${totalCount} items - Mixed)`;
+      allBtn.addEventListener('click', () => {
+        selectedVendorFilter = '__all__';
+        renderVendorFilterPills(uniqueVendors, vendorCounts, totalCount);
+        updateFilteredDisplay(currentParsedItems, true);
+      });
+      vendorFilterBar.appendChild(allBtn);
+
+      uniqueVendors.forEach(v => {
+        const count = vendorCounts.get(v);
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = `ucd-vendor-pill ${selectedVendorFilter === v ? 'active' : ''}`;
+        pill.textContent = `${v} (${count} item${count === 1 ? '' : 's'})`;
+        pill.addEventListener('click', () => {
+          selectedVendorFilter = v;
+          renderVendorFilterPills(uniqueVendors, vendorCounts, totalCount);
+          updateFilteredDisplay(currentParsedItems, true);
+        });
+        vendorFilterBar.appendChild(pill);
+      });
+    }
+
+    function updateFilteredDisplay(items, hasMultipleVendors) {
+      const isAll = (selectedVendorFilter === '__all__');
+      const displayItems = isAll
+        ? items
+        : items.filter(it => (it.vendor || 'Unspecified') === selectedVendorFilter);
+
+      activeFilteredItems = displayItems;
+
+      let subtotal = 0;
+      previewList.innerHTML = '';
+      displayItems.forEach((item, index) => {
+        const linePrice = parseFloat(item.unitPrice) * item.qty;
+        subtotal += isNaN(linePrice) ? 0 : linePrice;
+
+        const row = document.createElement('div');
+        row.className = 'ucd-preview-row';
+        const vendorTagHtml = (hasMultipleVendors && isAll)
+          ? `<div class="ucd-item-vendor-tag">${item.vendor || 'Unspecified'}</div>`
+          : '';
+
+        row.innerHTML = `
+          <div class="item-num">${index + 1}</div>
+          <div class="item-desc" title="${item.name}">
+            <span>${item.name || '<span style="color:#ef4444;">[Missing Description]</span>'}</span>
+            ${vendorTagHtml}
+          </div>
+          <div class="item-qty">${item.qty}</div>
+          <div class="item-price">$${item.unitPrice}</div>
+        `;
+        previewList.appendChild(row);
+      });
+
+      const currentVendorText = isAll ? 'Multiple' : selectedVendorFilter;
+      badgeCount.innerHTML = `${ICONS.package} <span>${displayItems.length} Items</span>`;
+      badgeVendor.innerHTML = `${ICONS.building} <span>${currentVendorText}</span>`;
+      badgeTotal.innerHTML = `${ICONS.dollar} <span>$${subtotal.toFixed(2)}</span>`;
+      previewItemTally.textContent = isAll
+        ? `${displayItems.length} items total`
+        : `${displayItems.length} items for ${selectedVendorFilter}`;
+
+      if (hasMultipleVendors && isAll) {
+        executeBtn.disabled = true;
+        executeBtn.innerHTML = `${ICONS.zap} <span>Select a Vendor Above to AutoFill</span>`;
+        executeBtn.title = 'UC Davis permits only one vendor per order request. Please select a vendor above.';
+        if (vendorWarningText) {
+          vendorWarningText.innerHTML = `<b>Multiple Vendors Detected:</b> UC Davis requires separate order requests for each vendor. Select a vendor below to populate only that vendor's items.`;
+        }
+      } else {
+        executeBtn.disabled = false;
+        executeBtn.title = '';
+        const vendorName = isAll ? (items[0]?.vendor || 'Order') : selectedVendorFilter;
+        executeBtn.innerHTML = `${ICONS.zap} <span>AutoFill ${vendorName} Order</span>`;
+        if (hasMultipleVendors && vendorWarningText) {
+          vendorWarningText.innerHTML = `Populating ${displayItems.length} items for <b>${selectedVendorFilter}</b>. Review & submit this order in the portal, then select the next vendor to fill remaining items.`;
+        }
+      }
+
+      statusBox.className = 'ucd-status-box';
+      statusBox.textContent = '';
+    }
 
     function handleTextData(text, sourceName, isPasted = false) {
       if (!text || !text.trim()) {
@@ -426,44 +559,45 @@
       activeFileName.textContent = `${fileName} (${items.length} items)`;
 
       summarySection.style.display = 'flex';
-      let subtotal = 0;
-      let vendor = items[0].vendor || 'Amazon';
 
-      previewList.innerHTML = '';
-      items.forEach((item, index) => {
-        const linePrice = parseFloat(item.unitPrice) * item.qty;
-        subtotal += isNaN(linePrice) ? 0 : linePrice;
+      const vendorCounts = getVendorCounts(items);
+      const uniqueVendors = Array.from(vendorCounts.keys());
+      const hasMultipleVendors = uniqueVendors.length > 1;
 
-        const row = document.createElement('div');
-        row.className = 'ucd-preview-row';
-        row.innerHTML = `
-          <div class="item-num">${index + 1}</div>
-          <div class="item-desc" title="${item.name}">${item.name}</div>
-          <div class="item-qty">${item.qty}</div>
-          <div class="item-price">$${item.unitPrice}</div>
-        `;
-        previewList.appendChild(row);
-      });
+      if (hasMultipleVendors) {
+        if (vendorSection) vendorSection.style.display = 'block';
+        selectedVendorFilter = '__all__';
+        renderVendorFilterPills(uniqueVendors, vendorCounts, items.length);
+      } else {
+        if (vendorSection) vendorSection.style.display = 'none';
+        selectedVendorFilter = uniqueVendors[0] || 'Amazon';
+      }
 
-      badgeCount.innerHTML = `${ICONS.package} <span>${items.length} Items</span>`;
-      badgeVendor.innerHTML = `${ICONS.building} <span>${vendor}</span>`;
-      badgeTotal.innerHTML = `${ICONS.dollar} <span>$${subtotal.toFixed(2)}</span>`;
-      previewItemTally.textContent = `${items.length} items parsed`;
-
-      statusBox.className = 'ucd-status-box';
-      statusBox.textContent = '';
+      updateFilteredDisplay(items, hasMultipleVendors);
     }
 
     // Execute Button
     executeBtn.addEventListener('click', async () => {
-      if (currentParsedItems.length === 0) return;
+      const vendorCounts = getVendorCounts(currentParsedItems);
+      const hasMultipleVendors = vendorCounts.size > 1;
+
+      if (hasMultipleVendors && selectedVendorFilter === '__all__') {
+        alert('Please select a specific vendor pill to populate that vendor\'s order.');
+        return;
+      }
+
+      const itemsToFill = (hasMultipleVendors && selectedVendorFilter !== '__all__')
+        ? activeFilteredItems
+        : currentParsedItems;
+
+      if (itemsToFill.length === 0) return;
 
       executeBtn.disabled = true;
       executeBtn.innerHTML = `${ICONS.zap} <span>Filling Form...</span>`;
       statusBox.className = 'ucd-status-box active info';
 
       try {
-        await fillPrePurchasingForm(currentParsedItems, settings, (msg, type) => {
+        await fillPrePurchasingForm(itemsToFill, settings, (msg, type) => {
           statusBox.textContent = msg;
           statusBox.className = `ucd-status-box active ${type}`;
         });
@@ -473,16 +607,21 @@
         statusBox.className = 'ucd-status-box active error';
       } finally {
         executeBtn.disabled = false;
-        executeBtn.innerHTML = `${ICONS.zap} <span>AutoFill Order Form</span>`;
+        const vendorName = (hasMultipleVendors && selectedVendorFilter !== '__all__')
+          ? selectedVendorFilter
+          : (currentParsedItems[0]?.vendor || 'Order');
+        executeBtn.innerHTML = `${ICONS.zap} <span>AutoFill ${vendorName} Order</span>`;
       }
     });
   }
 
   // Inject UI when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectUI);
-  } else {
-    injectUI();
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', injectUI);
+    } else {
+      injectUI();
+    }
   }
 
   if (typeof window !== 'undefined') {

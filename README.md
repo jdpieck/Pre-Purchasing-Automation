@@ -11,9 +11,11 @@ Instead of typing dozens of items, quantities, catalog numbers, URLs, and notes 
 ## Key Features
 
 - **⚡ Instant Form Population**: Enters Justification, Business Purpose, Vendor, Shipping Address, Approver Routing, Date Needed, and Line Items in seconds.
-- **🔍 Expands Item Details**: Automatically clicks the comment bubble to reveal and populate **Product Link (URL)** and **Purpose Description (Notes)** for every line item.
-- **🛠️ In-Browser Settings UI**: Lab members can enter and save their personal information (Name, Email, Phone, Approver, Shipping Address keyword, and Backorder preferences) directly in the extension's Settings tab—**no YAML editing required**.
-- **👋 First-Time User Onboarding**: Automatically guides new lab members to configure their purchasing details on first launch.
+- **🔍 Expands Item Details**: Automatically clicks the comment bubble to reveal and populate **Product Link (URL)** and **Item Notes** for every line item.
+- **🏷️ Multi-Vendor Support**: Detects mixed-vendor spreadsheets, respects UC Davis single-vendor order rules, and provides one-click vendor selector pills to fill each vendor's order sequentially without re-copying.
+- **🧮 Smart Column Detection & Auto-Derivation**: Accepts irregular or incomplete spreadsheets. Derives missing unit prices from total price & qty, extracts ASINs from Amazon links, and infers vendors from domains.
+- **🛠️ In-Browser Settings UI**: Lab members can enter their personal details (Deliver To, Phone, Email, Approver, Shipping Address, Backorders, Date Needed offset, and Default Order Justification) with instant **auto-save on blur**.
+- **📅 Accurate Date Needed & Live Preview**: Real-time preview of exact future delivery dates (`Fills with: MM/DD/YYYY`), preventing date calculation errors.
 - **📁 Compact Dropzone & Clear Option**: After uploading a CSV, the dropzone collapses into a sleek file card with a one-click **Clear / Start Over** button, while the preview table dynamically expands to fill the panel height.
 - **🎨 Sleek, Stable Interface**: Styled with [Lucide Icons](https://lucide.dev/) (with filled icons on active tabs) and a fixed-height layout to prevent vertical jumping between tabs.
 - **🔒 100% Client-Side & Private**: Runs entirely in your browser using plaintext open-source tools. No AI subscriptions, no external APIs, and no telemetry.
@@ -72,7 +74,7 @@ The extension expects a standard CSV with the following 8 columns (headerless or
 | **5** | `Price (Total)` | Extended total price | `$7.98` |
 | **6** | `Link` | Direct product URL | `https://www.amazon.com/gp/product/B08BRJHJF9...` |
 | **7** | `Vendor` | Vendor name for matching | `Amazon` |
-| **8** | `Purpose description`| Brief justification/note for item | `Cleaning up the office + general tools` |
+| **8** | `Item Notes` | Line-item notes (order justification is in Settings) | `Cleaning up the office + general tools` |
 
 See [`examples/Example Amazon Purchase Data.csv`](examples/Example%20Amazon%20Purchase%20Data.csv) for a full working sample.
 
@@ -83,8 +85,8 @@ If you are placing orders from Amazon, you don't need to create your spreadsheet
 1. Add your items to your Amazon cart.
 2. Click **[AMZ Cart Export](https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln)** to download your cart items directly into a CSV spreadsheet (this automatically populates columns 1–6: Item Name, ASIN, Qty, Unit Price, Total Price, and Product Link).
 3. Open the downloaded CSV in Excel, Google Sheets, or any text editor and **add the two remaining columns**:
-   - **Column 7 (`Vendor`)**: Enter `Amazon` (used by the assistant to match and select *Amazon Capital Services* in the UC Davis portal).
-   - **Column 8 (`Purpose description`)**: Enter a brief line-item justification or lab use note (e.g., *"Cleaning up the office + general tools"*).
+   - **Column 7 (`Vendor`)**: Enter `Amazon` (or leave empty if the URL is an Amazon link; the assistant infers it automatically).
+   - **Column 8 (`Item Notes`)**: Enter line-item notes or purpose (e.g., *"Cleaning up the office + general tools"*). Order-level justification can be preconfigured once in the Settings tab.
 4. Save the file and drop it into the Pre-Purchasing Assistant drawer!
 
 ---

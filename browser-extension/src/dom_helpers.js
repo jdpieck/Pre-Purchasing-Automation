@@ -6,7 +6,8 @@
 // --- Date Calculation Helper ---
 function getFutureDate(offsetDays) {
   const d = new Date();
-  d.setDate(d.getDate() + (offsetDays || 7));
+  const days = parseInt(offsetDays, 10);
+  d.setDate(d.getDate() + (Number.isNaN(days) ? 7 : days));
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   const yyyy = d.getFullYear();

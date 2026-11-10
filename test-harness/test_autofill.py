@@ -323,5 +323,118 @@ Cable Zip Ties400 Pack Black Assorted Sizes 12+8+6+4 InchMulti-Purpose Self-Lock
         self.assertFalse(os.path.exists(build_script_path), "build_userscript.py must be deleted")
         self.assertFalse(os.path.exists(content_js_path), "content.js monolith must be replaced by src/ modules")
 
+    def test_date_needed_string_concatenation_fix(self):
+        """Verify getFutureDate handles string integers safely without concatenation."""
+        import subprocess
+        node_script = """
+        const { getFutureDate } = require('./browser-extension/src/dom_helpers.js');
+        const res7Str = getFutureDate("7");
+        const res14Str = getFutureDate("14");
+        const res10Num = getFutureDate(10);
+        console.log(JSON.stringify({ res7Str, res14Str, res10Num }));
+        """
+        proc = subprocess.run(['node', '-e', node_script], cwd=BASE_DIR, capture_output=True, text=True, check=True)
+        data = json.loads(proc.stdout.strip())
+
+        today = datetime.now()
+        expected_7 = (today + timedelta(days=7)).strftime("%m/%d/%Y")
+        expected_14 = (today + timedelta(days=14)).strftime("%m/%d/%Y")
+        expected_10 = (today + timedelta(days=10)).strftime("%m/%d/%Y")
+
+        self.assertEqual(data['res7Str'], expected_7, "String '7' must yield exactly 7 days from today")
+        self.assertEqual(data['res14Str'], expected_14, "String '14' must yield exactly 14 days from today")
+        self.assertEqual(data['res10Num'], expected_10, "Number 10 must yield exactly 10 days from today")
+
+    def test_incomplete_table_heuristics_and_math(self):
+        """Verify parser derives missing unit price, total price, Amazon ASIN, and vendor from URL."""
+        import subprocess
+        node_script = """
+        const { parseCSV } = require('./browser-extension/src/parser.js');
+
+        // Case 1: Missing unit price (has total price and qty) + vendor from URL
+        const tsv1 = "Description\\tQuantity\\tTotal Price\\tProduct Link\\tItem Notes\\nHex Bolts\\t5\\t25.00\\thttps://www.mcmaster.com/123\\tChassis frame";
+        const items1 = parseCSV(tsv1);
+
+        // Case 2: Missing total price + missing ASIN (extracted from Amazon URL)
+        const csv2 = "Product Name,Qty,Price Each,URL\\nWireless Mouse,3,15.00,https://www.amazon.com/dp/B09XYZ1234";
+        const items2 = parseCSV(csv2);
+
+        // Case 3: Incomplete row with safe fallbacks
+        const tsv3 = "Item\\nOnlyName";
+        const items3 = parseCSV(tsv3);
+
+        console.log(JSON.stringify({ items1, items2, items3 }));
+        """
+        proc = subprocess.run(['node', '-e', node_script], cwd=BASE_DIR, capture_output=True, text=True, check=True)
+        data = json.loads(proc.stdout.strip())
+
+        item1 = data['items1'][0]
+        self.assertEqual(item1['name'], "Hex Bolts")
+        self.assertEqual(item1['qty'], 5)
+        self.assertEqual(item1['unitPrice'], "5.00", "Unit price must be derived as $25.00 / 5 = $5.00")
+        self.assertEqual(item1['totalPrice'], "25.00")
+        self.assertEqual(item1['vendor'], "McMaster-Carr", "Vendor must be inferred from mcmaster.com URL")
+        self.assertEqual(item1['notes'], "Chassis frame")
+
+        item2 = data['items2'][0]
+        self.assertEqual(item2['name'], "Wireless Mouse")
+        self.assertEqual(item2['qty'], 3)
+        self.assertEqual(item2['asin'], "B09XYZ1234", "ASIN must be extracted from Amazon URL")
+        self.assertEqual(item2['unitPrice'], "15.00")
+        self.assertEqual(item2['totalPrice'], "45.00", "Total price must be derived as 3 * $15.00 = $45.00")
+        self.assertEqual(item2['vendor'], "Amazon")
+
+        item3 = data['items3'][0]
+        self.assertEqual(item3['name'], "OnlyName")
+        self.assertEqual(item3['qty'], 1, "Qty must fallback to 1")
+        self.assertEqual(item3['unitPrice'], "0.00", "Unit price must fallback to 0.00")
+        self.assertEqual(item3['totalPrice'], "0.00", "Total price must fallback to 0.00")
+
+    def test_multi_vendor_detection_and_filtering(self):
+        """Verify multi-vendor orders are detected and can be isolated by vendor."""
+        import subprocess
+        node_script = """
+        const { parseCSV } = require('./browser-extension/src/parser.js');
+        const data = "Description\\tQty\\tPrice\\tVendor\\nScrew\\t10\\t1.00\\tMcMaster-Carr\\nCable\\t2\\t5.00\\tAmazon\\nNut\\t20\\t0.50\\tMcMaster-Carr";
+        const items = parseCSV(data);
+
+        const vendors = new Set(items.map(it => it.vendor));
+        const mcmasterItems = items.filter(it => it.vendor === 'McMaster-Carr');
+        const amazonItems = items.filter(it => it.vendor === 'Amazon');
+
+        console.log(JSON.stringify({
+          uniqueVendorCount: vendors.size,
+          mcmasterCount: mcmasterItems.length,
+          amazonCount: amazonItems.length
+        }));
+        """
+        proc = subprocess.run(['node', '-e', node_script], cwd=BASE_DIR, capture_output=True, text=True, check=True)
+        res = json.loads(proc.stdout.strip())
+
+        self.assertEqual(res['uniqueVendorCount'], 2, "Must detect exactly 2 unique vendors")
+        self.assertEqual(res['mcmasterCount'], 2, "Must filter 2 McMaster items")
+        self.assertEqual(res['amazonCount'], 1, "Must filter 1 Amazon item")
+
+    def test_terminology_and_item_notes(self):
+        """Verify 'Item Notes' terminology consistency and UI elements for vendor bar & date preview."""
+        template_path = os.path.join(SRC_DIR, 'template.js')
+        with open(template_path, 'r', encoding='utf-8') as f:
+            template = f.read()
+
+        self.assertIn("Item Notes", template, "Must reference 'Item Notes' in template")
+        self.assertIn("ucd-vendor-section", template, "Must include ucd-vendor-section in template")
+        self.assertIn("ucd-vendor-filter-bar", template, "Must include ucd-vendor-filter-bar in template")
+        self.assertIn("ucd-date-preview-label", template, "Must include ucd-date-preview-label in template")
+        self.assertIn("Default Order Justification", template, "Must clarify default justification in Settings")
+
+        css_path = os.path.join(BASE_DIR, 'browser-extension', 'styles.css')
+        with open(css_path, 'r', encoding='utf-8') as f:
+            css = f.read()
+
+        self.assertIn(".ucd-vendor-warning-banner", css, "styles.css must style vendor warning banner")
+        self.assertIn(".ucd-vendor-filter-bar", css, "styles.css must style vendor filter bar")
+        self.assertIn(".ucd-vendor-pill", css, "styles.css must style vendor filter pills")
+        self.assertIn(".ucd-date-preview", css, "styles.css must style date preview label")
+
 if __name__ == '__main__':
     unittest.main()

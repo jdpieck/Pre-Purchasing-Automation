@@ -24,7 +24,7 @@ async function fillPrePurchasingForm(items, settings, onProgress) {
   log("Starting form autofill sequence...", 'info');
 
   // 1. Justification & Business Purpose
-  const justificationText = items[0].purpose || settings.defaultJustification || "";
+  const justificationText = settings.defaultJustification || items[0].notes || items[0].purpose || "";
   const justEl = document.querySelector('textarea[name="justification"]');
   if (justEl && justificationText) {
     _setInputValue(justEl, justificationText);
@@ -99,7 +99,22 @@ async function fillPrePurchasingForm(items, settings, onProgress) {
   const dateNeededEl = document.querySelector('input[name="dateNeeded"]') || document.querySelector('#order-preferences-section input[type="text"]');
   if (dateNeededEl) {
     const dateStr = _getFutureDate(settings.dateOffsetDays || 7);
-    _setInputValue(dateNeededEl, dateStr);
+    dateNeededEl.value = dateStr;
+    dateNeededEl.dispatchEvent(new Event('input', { bubbles: true }));
+    dateNeededEl.dispatchEvent(new Event('change', { bubbles: true }));
+    dateNeededEl.dispatchEvent(new Event('blur', { bubbles: true }));
+
+    // Synchronize jQuery UI datepicker if attached
+    if (typeof window !== 'undefined' && window.jQuery) {
+      try {
+        const $el = window.jQuery(dateNeededEl);
+        if (typeof $el.datepicker === 'function') {
+          $el.datepicker('setDate', dateStr);
+        }
+      } catch (e) {
+        // Datepicker fallback
+      }
+    }
     log(`✓ Date needed set to ${dateStr}`);
   }
 
@@ -187,10 +202,11 @@ async function fillPrePurchasingForm(items, settings, onProgress) {
       _setInputValue(urlEl, item.url);
     }
 
-    // Fill Item Notes (Purpose description)
+    // Fill Item Notes (line-item notes)
     const notesEl = document.querySelector(`textarea[name="items[${i}].notes"]`);
-    if (notesEl && item.purpose) {
-      _setInputValue(notesEl, item.purpose);
+    const noteText = item.notes || item.purpose || '';
+    if (notesEl && noteText) {
+      _setInputValue(notesEl, noteText);
     }
   }
 

@@ -45,8 +45,15 @@
 - **jQuery Chosen Dropdowns**: When updating styled selects (`vendor`, `shipAddress`, `approvers`), trigger `.trigger('chosen:updated').trigger('liszt:updated').trigger('change')` and update the visible Chosen single span text.
 
 ## 6. CSV & Spreadsheet Ingestion Pipeline
-- **8-Column Format**: Columns must remain 1: `Item Name`, 2: `ASIN / Catalog #`, 3: `Qty`, 4: `Price (Unit)`, 5: `Price (Total)`, 6: `Link`, 7: `Vendor`, 8: `Purpose description` (headerless or with headers).
-- **Dual Delimiter Support (CSV & TSV)**: The import pipeline must support both standard comma-separated files (`.csv`) and tab-delimited text (`\t`) copied directly from Google Sheets or Excel clipboards.
+- **8-Column Format**: Columns default to 1: `Item Name`, 2: `ASIN / Catalog #`, 3: `Qty`, 4: `Price (Unit)`, 5: `Price (Total)`, 6: `Link`, 7: `Vendor`, 8: `Item Notes` (headerless or with headers). Note that column 8 represents individual line-item notes, whereas order-level Justification is configured under Settings.
+- **Smart Column Detection & Flexible Formats**: For finance spreadsheets with arbitrary column ordering, `COLUMN_SYNONYMS` maps header variants. Content heuristics identify URLs, prices, quantities, and vendors for headerless irregular tables.
+- **Missing Field Derivation Engine**:
+  - Automatically derives unit price when only total price & qty are present ($\text{unitPrice} = \text{totalPrice} / \text{qty}$).
+  - Automatically derives total price when only unit price & qty are present ($\text{totalPrice} = \text{unitPrice} \times \text{qty}$).
+  - Extracts Amazon ASINs directly from URLs (`/(?:dp|gp\/product)\/([A-Z0-9]{10})/i`).
+  - Infers vendors from domain names (`mcmaster.com` $\to$ `McMaster-Carr`, `amazon.com` $\to$ `Amazon`, etc.).
+- **Multi-Vendor Isolation Workflow**: UC Davis Pre-Purchasing restricts each order request to a single vendor. When mixed vendors are detected, AutoFill is locked for "All Vendors" and interactive vendor filter pills allow users to populate and submit each vendor's items sequentially with zero re-copying.
+- **Dual Delimiter Support (CSV & TSV)**: The import pipeline supports both standard comma-separated files (`.csv`) and tab-delimited text (`\t`) copied directly from Google Sheets or Excel clipboards.
 - **Quote & Inch Mark Invariant**: E-commerce titles frequently include unescaped inch marks (e.g., `(12.5"x12.5")` or `12" Ruler`). Parsers must only enter quote-delimited string mode when `"` appears at the start of a token, treating internal quotes in unquoted tokens as literal characters so subsequent tab/comma delimiters are never consumed.
 - **Import UI Modalities**: Provide both a file dropzone and a direct paste textarea with subtabs, while supporting zero-click global <kbd>Ctrl+V</kbd> paste detection anywhere on the Import tab.
-- **AMZ Cart Export Workflow**: Officially recommend the [AMZ Cart Export](https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln) extension for Amazon orders (it provides columns 1–6 automatically; users append column 7 `Vendor` and column 8 `Purpose description`).
+- **AMZ Cart Export Workflow**: Officially recommend the [AMZ Cart Export](https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln) extension for Amazon orders (it provides columns 1–6 automatically; users append column 7 `Vendor` and column 8 `Item Notes`).

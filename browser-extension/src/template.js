@@ -84,7 +84,7 @@ function getDrawerHtml(options = {}) {
             <!-- Subview 2: Direct Paste Area -->
             <div class="ucd-subview" id="ucd-subview-paste" style="display: none;">
               <div class="ucd-paste-container">
-                <textarea id="ucd-paste-input" class="ucd-paste-textarea" placeholder="Copy rows from Google Sheets or Excel and paste here (Ctrl+V)...&#10;&#10;Supports 8 columns:&#10;Item Name | ASIN | Qty | Unit Price | Total Price | Link | Vendor | Purpose"></textarea>
+                <textarea id="ucd-paste-input" class="ucd-paste-textarea" placeholder="Copy rows from Google Sheets or Excel and paste here (Ctrl+V)...&#10;&#10;Supports 8 columns:&#10;Item Name | ASIN | Qty | Unit Price | Total Price | Link | Vendor | Item Notes"></textarea>
                 <div class="ucd-paste-actions">
                   <button type="button" class="ucd-btn ucd-btn-primary" id="ucd-parse-paste-btn">
                     ${ICONS.zap}
@@ -123,6 +123,17 @@ function getDrawerHtml(options = {}) {
               <span class="ucd-badge blue" id="badge-count">${ICONS.package} 0 Items</span>
               <span class="ucd-badge gold" id="badge-vendor">${ICONS.building} None</span>
               <span class="ucd-badge green" id="badge-total">${ICONS.dollar} $0.00</span>
+            </div>
+
+            <!-- Multi-Vendor Notification & Selector Bar -->
+            <div id="ucd-vendor-section" style="display: none;">
+              <div class="ucd-vendor-warning-banner" id="ucd-vendor-warning-banner">
+                <span class="warning-icon">${ICONS.info}</span>
+                <div class="warning-text" id="ucd-vendor-warning-text">
+                  <b>Multiple Vendors Detected:</b> UC Davis requires separate order requests for each vendor. Select a vendor below to populate only that vendor's items.
+                </div>
+              </div>
+              <div class="ucd-vendor-filter-bar" id="ucd-vendor-filter-bar"></div>
             </div>
 
             <div class="ucd-preview-card">
@@ -201,6 +212,8 @@ function getDrawerHtml(options = {}) {
               <span class="ucd-field-saved-badge" data-for="setting-dateOffsetDays">✓ Saved</span>
             </div>
             <input type="number" id="setting-dateOffsetDays" min="1" max="60" />
+            <div class="ucd-date-preview" id="ucd-date-preview-label">Fills with: MM/DD/YYYY</div>
+            <div class="help-text">Number of calendar days in the future to request delivery.</div>
           </div>
           <div class="ucd-form-group">
             <div class="ucd-form-label-row">
@@ -226,10 +239,11 @@ function getDrawerHtml(options = {}) {
           </div>
           <div class="ucd-form-group">
             <div class="ucd-form-label-row">
-              <label>Default Justification Fallback</label>
+              <label>Default Order Justification</label>
               <span class="ucd-field-saved-badge" data-for="setting-defaultJustification">✓ Saved</span>
             </div>
             <textarea id="setting-defaultJustification" rows="2" placeholder="e.g., General laboratory research supplies"></textarea>
+            <div class="help-text">Applies to the entire order request (Justification and Business Purpose in the portal).</div>
           </div>
 
           <div class="ucd-settings-actions">
@@ -285,7 +299,7 @@ function getDrawerHtml(options = {}) {
                 5. <b>Price (Total)</b> (Extended total)<br/>
                 6. <b>Link</b> (Direct product URL)<br/>
                 7. <b>Vendor</b> (e.g. Amazon)<br/>
-                8. <b>Purpose description</b> (Item notes / justification)
+                8. <b>Item Notes</b> (Line-item notes; order justification is set under Settings)
               </div>
               <div style="font-size: 11px; color: var(--ucd-text-muted); margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--ucd-border); line-height: 1.5;">
                 💡 <b>Tip</b>: You can copy cells directly in Google Sheets or Excel (Ctrl+C) and press <b>Ctrl+V</b> in the Import tab! Or use the <a href="https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln" target="_blank" rel="noopener noreferrer" style="color: var(--ucd-blue); font-weight: 600; text-decoration: underline;">AMZ Cart Export</a> extension to export Amazon carts.
