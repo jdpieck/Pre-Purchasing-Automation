@@ -18,10 +18,11 @@
 - Content scripts are cleanly deconstructed by responsibility:
   1. `src/icons.js` (Lucide SVG icons)
   2. `src/constants.js` (Settings schema, defaults, storage helpers)
-  3. `src/dom_helpers.js` (Portal input handlers, date calculations, row cloning)
-  4. `src/parser.js` (CSV/TSV delimiter detection, quotation invariants, line item parsing)
-  5. `src/autofill.js` (Core form population sequence, backorder handling, line items)
-  6. `src/ui.js` (Drawer injection, tabs, settings auto-save, file dropzone & paste handling)
+  3. `src/template.js` (Injected drawer HTML markup component)
+  4. `src/dom_helpers.js` (Portal input handlers, date calculations, row cloning)
+  5. `src/parser.js` (CSV/TSV delimiter detection, quotation invariants, line item parsing)
+  6. `src/autofill.js` (Core form population sequence, backorder handling, line items)
+  7. `src/ui.js` (Drawer injection, tabs, settings auto-save, file dropzone & paste handling)
 - Run tests (`python -m unittest test-harness/test_autofill.py`) to verify that all syntax, selectors, and simulations pass.
 
 ## 4. UI Architecture & Icon Rules

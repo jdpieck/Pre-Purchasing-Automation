@@ -19,6 +19,7 @@
       "js": [
         "src/icons.js",
         "src/constants.js",
+        "src/template.js",
         "src/dom_helpers.js",
         "src/parser.js",
         "src/autofill.js",

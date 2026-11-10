@@ -39,6 +39,7 @@ class MockHandler(http.server.SimpleHTTPRequestHandler):
             <link rel="stylesheet" href="/styles.css">
             <script src="/src/icons.js" defer></script>
             <script src="/src/constants.js" defer></script>
+            <script src="/src/template.js" defer></script>
             <script src="/src/dom_helpers.js" defer></script>
             <script src="/src/parser.js" defer></script>
             <script src="/src/autofill.js" defer></script>

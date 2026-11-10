@@ -97,6 +97,7 @@ Pre-Perchase-Automation/
 │   ├── src/                        # Modular content script engine
 │   │   ├── icons.js                # Lucide SVG icon definitions
 │   │   ├── constants.js            # Settings defaults and storage helpers
+│   │   ├── template.js             # Injected drawer HTML layout component
 │   │   ├── dom_helpers.js          # Portal DOM interaction and event dispatchers
 │   │   ├── parser.js               # CSV/TSV spreadsheet parsing engine
 │   │   ├── autofill.js             # Form population engine

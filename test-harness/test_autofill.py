@@ -86,29 +86,34 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
     def test_extension_javascript_syntax_and_handlers(self):
         """Verify modular source files have all required handlers, branding, and contact channels."""
         ui_path = os.path.join(SRC_DIR, 'ui.js')
+        template_path = os.path.join(SRC_DIR, 'template.js')
         dom_path = os.path.join(SRC_DIR, 'dom_helpers.js')
         icons_path = os.path.join(SRC_DIR, 'icons.js')
 
         self.assertTrue(os.path.exists(ui_path), "ui.js must exist")
+        self.assertTrue(os.path.exists(template_path), "template.js must exist")
         self.assertTrue(os.path.exists(dom_path), "dom_helpers.js must exist")
         self.assertTrue(os.path.exists(icons_path), "icons.js must exist")
 
         with open(ui_path, 'r', encoding='utf-8') as f:
             ui_code = f.read()
+        with open(template_path, 'r', encoding='utf-8') as f:
+            template_code = f.read()
         with open(dom_path, 'r', encoding='utf-8') as f:
             dom_code = f.read()
         with open(icons_path, 'r', encoding='utf-8') as f:
             icons_code = f.read()
 
-        self.assertIn("Pre-Purchasing Assistant for UC Davis", ui_code)
+        self.assertIn("Pre-Purchasing Assistant for UC Davis", template_code)
+        self.assertIn("jdpieck.github.io", template_code)
+        self.assertIn("gemini.google.com", template_code)
+        self.assertIn("github.com/jdpieck/Pre-Purchasing-Automation/issues", template_code)
+        self.assertIn("jdpieck@ucdavis.edu", template_code)
+
         self.assertIn("showSettingsStatus", ui_code)
         self.assertIn("clear-settings", ui_code)
         self.assertIn("handleFieldAutoSave", ui_code)
         self.assertIn("saveCurrentSettings", ui_code)
-        self.assertIn("jdpieck.github.io", ui_code)
-        self.assertIn("gemini.google.com", ui_code)
-        self.assertIn("github.com/jdpieck/Pre-Purchasing-Automation/issues", ui_code)
-        self.assertIn("jdpieck@ucdavis.edu", ui_code)
 
         self.assertIn("setBackorderState", dom_code)
         self.assertIn("getIconUrl", icons_code)
@@ -261,16 +266,20 @@ Cable Zip Ties400 Pack Black Assorted Sizes 12+8+6+4 InchMulti-Purpose Self-Lock
         self.assertEqual(proc.returncode, 0, f"Copy-paste TSV Node simulation failed: {proc.stderr}")
 
     def test_copy_paste_ui_handlers_and_branding(self):
-        """Verify ui.js includes copy-paste components and accessibility attributes."""
+        """Verify template.js and ui.js include copy-paste components and accessibility attributes."""
         ui_path = os.path.join(SRC_DIR, 'ui.js')
+        template_path = os.path.join(SRC_DIR, 'template.js')
         with open(ui_path, 'r', encoding='utf-8') as f:
-            code = f.read()
+            ui_code = f.read()
+        with open(template_path, 'r', encoding='utf-8') as f:
+            template_code = f.read()
 
-        self.assertIn("ucd-paste-input", code)
-        self.assertIn("ucd-import-subtabs", code)
-        self.assertIn("handleTextData", code)
-        self.assertIn("clipboard", code)
-        self.assertIn("Paste Spreadsheet", code)
+        self.assertIn("ucd-paste-input", template_code)
+        self.assertIn("ucd-import-subtabs", template_code)
+        self.assertIn("Paste Spreadsheet", template_code)
+
+        self.assertIn("handleTextData", ui_code)
+        self.assertIn("clipboard", ui_code)
 
     def test_modular_manifest_and_icons_architecture(self):
         """Verify manifest.json has modular script sequence and icons reference the icons/ directory."""
@@ -282,6 +291,7 @@ Cable Zip Ties400 Pack Black Assorted Sizes 12+8+6+4 InchMulti-Purpose Self-Lock
         expected_modules = [
             "src/icons.js",
             "src/constants.js",
+            "src/template.js",
             "src/dom_helpers.js",
             "src/parser.js",
             "src/autofill.js",
