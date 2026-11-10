@@ -7,17 +7,21 @@
 
 ## 2. Project Branding, Versioning & Licensing
 - **App Name**: Always use `"Pre-Purchasing Assistant for UC Davis"` (to prevent misconception of official UC Davis institutional development). For pre-1.0 releases, append `(Beta)` to the extension name and include beta badges in UI launchers.
-- **Initial Versioning**: Pre-release versions start at `0.1.0` (matching across `manifest.json`, `content.js`, and `ucd_prepurchasing.user.js`).
+- **Initial Versioning**: Pre-release versions start at `0.1.0` (matching across `manifest.json` and UI version tags).
 - **License**: Licensed exclusively under the **GNU General Public License v3.0 (GPLv3)** to guarantee reciprocal open-source copyleft protection.
 - **Credits & Links**: Maintain the exact attribution and dual contact channels:
   - "Developed by [Jason Pieck](https://jdpieck.github.io/) using [Gemini](https://gemini.google.com/)."
   - Support contact: Direct users to submit issues on GitHub (`https://github.com/jdpieck/Pre-Purchasing-Automation/issues`) or email `jdpieck@ucdavis.edu`.
 
-## 3. Dual-Packaging Synchronization
-- The application is distributed in two forms:
-  1. Chrome/Edge/Firefox WebExtension in `browser-extension/` (`manifest.json`, `content.js`, `styles.css`).
-  2. Standalone Userscript in `browser-extension/ucd_prepurchasing.user.js` (for Tampermonkey / Violentmonkey).
-- **Rule**: Whenever `content.js` or `styles.css` is modified, run `python scripts/build_userscript.py` to regenerate `ucd_prepurchasing.user.js` to keep both distribution channels in 100% sync.
+## 3. Modular WebExtension Architecture
+- The application is distributed as a Manifest V3 WebExtension in `browser-extension/` (`manifest.json`, `styles.css`, and modular source files in `browser-extension/src/`).
+- Content scripts are cleanly deconstructed by responsibility:
+  1. `src/icons.js` (Lucide SVG icons)
+  2. `src/constants.js` (Settings schema, defaults, storage helpers)
+  3. `src/dom_helpers.js` (Portal input handlers, date calculations, row cloning)
+  4. `src/parser.js` (CSV/TSV delimiter detection, quotation invariants, line item parsing)
+  5. `src/autofill.js` (Core form population sequence, backorder handling, line items)
+  6. `src/ui.js` (Drawer injection, tabs, settings auto-save, file dropzone & paste handling)
 - Run tests (`python -m unittest test-harness/test_autofill.py`) to verify that all syntax, selectors, and simulations pass.
 
 ## 4. UI Architecture & Icon Rules

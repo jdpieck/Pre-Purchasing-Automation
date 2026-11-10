@@ -1,6 +1,6 @@
 # Pre-Purchasing Assistant for UC Davis (Beta) ⚡
 
-A cross-platform browser extension and userscript designed to automate entering lab purchasing requests into the **UC Davis Pre-Purchasing System** (`https://prepurchasing.ucdavis.edu`).
+A lightweight browser extension designed to automate entering lab purchasing requests into the **UC Davis Pre-Purchasing System** (`https://prepurchasing.ucdavis.edu`).
 
 > **Status: Beta (v0.1.0)** — Actively tested with the UC Davis Pre-Purchasing order request portal.
 
@@ -22,11 +22,9 @@ Instead of typing dozens of items, quantities, catalog numbers, URLs, and notes 
 
 ---
 
-## Installation Options (No Web Store Approval Needed)
+## Installation (No Web Store Approval Needed)
 
-You do **not** need browser store approval to install and use this tool. Choose either of the two installation methods below:
-
-### Option 1: Chrome / Edge / Brave Extension (Recommended)
+You do **not** need browser store approval to install and use this tool. Follow these simple steps to load the extension in Chrome, Microsoft Edge, or Brave:
 
 1. Clone or download this repository to your computer.
 2. Open your browser and navigate to the extensions management page:
@@ -38,16 +36,6 @@ You do **not** need browser store approval to install and use this tool. Choose 
 6. The extension is now installed! It will automatically activate whenever you visit `https://prepurchasing.ucdavis.edu/Order/Request/*`.
 
 > **Updating**: When you pull updates from GitHub, simply go to your extensions page and click the reload icon on the extension card.
-
----
-
-### Option 2: 1-Click Tampermonkey Userscript
-
-If you prefer using a userscript manager:
-1. Install [Tampermonkey](https://www.tampermonkey.net/) (or Violentmonkey) from your browser's extension store.
-2. Open the file [`browser-extension/ucd_prepurchasing.user.js`](browser-extension/ucd_prepurchasing.user.js) in your browser (or click on it in GitHub).
-3. Tampermonkey will prompt you with an **Install** screen. Click **Install**.
-4. The script will automatically run on the UC Davis Pre-Purchasing order request page.
 
 ---
 
@@ -105,16 +93,19 @@ If you are placing orders from Amazon, you don't need to create your spreadsheet
 
 ```text
 Pre-Perchase-Automation/
-├── browser-extension/              # Browser extension manifest, core script, styles, and icons
-│   ├── content.js                  # Core automation engine and UI drawer
+├── browser-extension/              # Browser extension manifest, modular scripts, styles, and icons
+│   ├── src/                        # Modular content script engine
+│   │   ├── icons.js                # Lucide SVG icon definitions
+│   │   ├── constants.js            # Settings defaults and storage helpers
+│   │   ├── dom_helpers.js          # Portal DOM interaction and event dispatchers
+│   │   ├── parser.js               # CSV/TSV spreadsheet parsing engine
+│   │   ├── autofill.js             # Form population engine
+│   │   └── ui.js                   # Injected drawer UI and event listeners
 │   ├── styles.css                  # UI styling with UC Davis theme
 │   ├── manifest.json               # Manifest V3 extension configuration
-│   ├── icons/                      # WebExtension and Lucide SVG icons
-│   └── ucd_prepurchasing.user.js   # Standalone 1-click Userscript (built from content.js & styles.css)
+│   └── icons/                      # WebExtension action and toolbar icons
 ├── examples/                       # Sample order spreadsheets
 │   └── Example Amazon Purchase Data.csv
-├── scripts/                        # Automation & synchronization scripts
-│   └── build_userscript.py         # Dual-packaging compiler keeping extension & userscript in sync
 └── test-harness/                   # Development test fixtures and mock server
     ├── extracted_page.html         # Local sanitized DOM snapshot of the portal
     ├── serve_mock.py               # Local HTTP server with extension pre-injected
@@ -139,15 +130,9 @@ You can test the entire extension and form-filling flow offline without connecti
 3. The mock server serves a local snapshot of the UC Davis portal with the extension pre-injected. Drop [`examples/Example Amazon Purchase Data.csv`](examples/Example%20Amazon%20Purchase%20Data.csv) into the drawer and test the filling sequence!
 
 ### Automated Test Suite
-Run the automated test suite anytime to verify syntax, selectors, mock page compatibility, and userscript synchronization:
+Run the automated test suite anytime to verify syntax, selectors, mock page compatibility, and modular parsing logic:
 ```bash
 python -m unittest test-harness/test_autofill.py
-```
-
-### Packaging & Synchronizing Userscript
-Whenever modifying `browser-extension/content.js` or `browser-extension/styles.css`, regenerate the standalone userscript to keep both channels in 100% sync:
-```bash
-python scripts/build_userscript.py
 ```
 
 ---

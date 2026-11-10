@@ -37,7 +37,12 @@ class MockHandler(http.server.SimpleHTTPRequestHandler):
             injection = """
             <!-- UC Davis Pre-Purchasing AutoFill Local Test Harness Injection -->
             <link rel="stylesheet" href="/styles.css">
-            <script src="/content.js" defer></script>
+            <script src="/src/icons.js" defer></script>
+            <script src="/src/constants.js" defer></script>
+            <script src="/src/dom_helpers.js" defer></script>
+            <script src="/src/parser.js" defer></script>
+            <script src="/src/autofill.js" defer></script>
+            <script src="/src/ui.js" defer></script>
             """
             if '</head>' in content:
                 content = content.replace('</head>', injection + '\n</head>', 1)
@@ -53,8 +58,9 @@ class MockHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # Serve extension static files
-        if self.path == '/content.js':
-            self.serve_file(os.path.join(EXT_DIR, 'content.js'), 'application/javascript')
+        if self.path.startswith('/src/'):
+            filename = os.path.basename(self.path)
+            self.serve_file(os.path.join(EXT_DIR, 'src', filename), 'application/javascript')
             return
         if self.path == '/styles.css':
             self.serve_file(os.path.join(EXT_DIR, 'styles.css'), 'text/css')
@@ -64,7 +70,8 @@ class MockHandler(http.server.SimpleHTTPRequestHandler):
             return
         if self.path.startswith('/icons/'):
             icon_name = os.path.basename(self.path)
-            self.serve_file(os.path.join(EXT_DIR, 'icons', icon_name), 'image/png')
+            mime = 'image/svg+xml' if icon_name.endswith('.svg') else 'image/png'
+            self.serve_file(os.path.join(EXT_DIR, 'icons', icon_name), mime)
             return
 
         # Default fallback

@@ -16,7 +16,14 @@
         "http://localhost:*/*",
         "http://127.0.0.1:*/*"
       ],
-      "js": ["content.js"],
+      "js": [
+        "src/icons.js",
+        "src/constants.js",
+        "src/dom_helpers.js",
+        "src/parser.js",
+        "src/autofill.js",
+        "src/ui.js"
+      ],
       "css": ["styles.css"],
       "run_at": "document_idle"
     }

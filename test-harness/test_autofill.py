@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
 Automated Unit and Integration Tests for Pre-Purchasing Assistant for UC Davis
-Tests CSV parsing, data mapping, vendor matching, address matching, tzCheckBox backorder structure, and mock HTML.
+Tests CSV parsing, data mapping, vendor matching, address matching, tzCheckBox backorder structure, and modular extension files.
 """
 
 import unittest
 import os
 import re
 import csv
+import json
 from datetime import datetime, timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,8 +20,9 @@ HTML_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extracted_
 if not os.path.exists(HTML_PATH):
     HTML_PATH = os.path.join(BASE_DIR, 'extracted_page.html')
 
-JS_PATH = os.path.join(BASE_DIR, 'browser-extension', 'content.js')
-USERSCRIPT_PATH = os.path.join(BASE_DIR, 'browser-extension', 'ucd_prepurchasing.user.js')
+SRC_DIR = os.path.join(BASE_DIR, 'browser-extension', 'src')
+ICONS_DIR = os.path.join(BASE_DIR, 'browser-extension', 'icons')
+MANIFEST_PATH = os.path.join(BASE_DIR, 'browser-extension', 'manifest.json')
 
 class TestPrePurchasingAutoFill(unittest.TestCase):
 
@@ -82,20 +84,34 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
         self.assertTrue(re.match(r'^\d{2}/\d{2}/\d{4}$', expected_str))
 
     def test_extension_javascript_syntax_and_handlers(self):
-        """Verify content.js has all required handlers, branding, and contact channels."""
-        with open(JS_PATH, 'r', encoding='utf-8') as f:
-            code = f.read()
+        """Verify modular source files have all required handlers, branding, and contact channels."""
+        ui_path = os.path.join(SRC_DIR, 'ui.js')
+        dom_path = os.path.join(SRC_DIR, 'dom_helpers.js')
+        icons_path = os.path.join(SRC_DIR, 'icons.js')
 
-        self.assertIn("Pre-Purchasing Assistant for UC Davis", code)
-        self.assertIn("setBackorderState", code)
-        self.assertIn("showSettingsStatus", code)
-        self.assertIn("clear-settings", code)
-        self.assertIn("handleFieldAutoSave", code)
-        self.assertIn("saveCurrentSettings", code)
-        self.assertIn("jdpieck.github.io", code)
-        self.assertIn("gemini.google.com", code)
-        self.assertIn("github.com/jdpieck/Pre-Purchasing-Automation/issues", code)
-        self.assertIn("jdpieck@ucdavis.edu", code)
+        self.assertTrue(os.path.exists(ui_path), "ui.js must exist")
+        self.assertTrue(os.path.exists(dom_path), "dom_helpers.js must exist")
+        self.assertTrue(os.path.exists(icons_path), "icons.js must exist")
+
+        with open(ui_path, 'r', encoding='utf-8') as f:
+            ui_code = f.read()
+        with open(dom_path, 'r', encoding='utf-8') as f:
+            dom_code = f.read()
+        with open(icons_path, 'r', encoding='utf-8') as f:
+            icons_code = f.read()
+
+        self.assertIn("Pre-Purchasing Assistant for UC Davis", ui_code)
+        self.assertIn("showSettingsStatus", ui_code)
+        self.assertIn("clear-settings", ui_code)
+        self.assertIn("handleFieldAutoSave", ui_code)
+        self.assertIn("saveCurrentSettings", ui_code)
+        self.assertIn("jdpieck.github.io", ui_code)
+        self.assertIn("gemini.google.com", ui_code)
+        self.assertIn("github.com/jdpieck/Pre-Purchasing-Automation/issues", ui_code)
+        self.assertIn("jdpieck@ucdavis.edu", ui_code)
+
+        self.assertIn("setBackorderState", dom_code)
+        self.assertIn("getIconUrl", icons_code)
 
     def test_tabs_span_and_settings_autosave(self):
         """Verify tab buttons span full width and settings auto-save is implemented in CSS and JS."""
@@ -113,30 +129,14 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
         self.assertIn(".ucd-field-saved-badge", css, "Must define .ucd-field-saved-badge in styles.css")
         self.assertIn(".ucd-settings-floating-toast", css, "Must define .ucd-settings-floating-toast in styles.css")
 
-        with open(JS_PATH, 'r', encoding='utf-8') as f:
+        ui_path = os.path.join(SRC_DIR, 'ui.js')
+        with open(ui_path, 'r', encoding='utf-8') as f:
             js = f.read()
 
-        self.assertIn("handleFieldAutoSave", js, "Auto-save handler must exist in content.js")
-        self.assertIn("showFieldSavedBadge", js, "showFieldSavedBadge function must exist in content.js")
-        self.assertIn("addEventListener('blur'", js, "Must bind blur event for text inputs in content.js")
-        self.assertIn("addEventListener('change'", js, "Must bind change event in content.js")
-
-    def test_dual_packaging_sync(self):
-        """Verify standalone userscript is in sync with content.js and manifest version."""
-        self.assertTrue(os.path.exists(USERSCRIPT_PATH), "Userscript must exist")
-        with open(USERSCRIPT_PATH, 'r', encoding='utf-8') as f:
-            userscript = f.read()
-        with open(JS_PATH, 'r', encoding='utf-8') as f:
-            content_js = f.read()
-
-        self.assertIn("Pre-Purchasing Assistant for UC Davis", userscript)
-        self.assertIn("(Beta)", userscript)
-        self.assertIn("@version      0.1.0", userscript)
-        self.assertIn("setBackorderState", userscript)
-        self.assertIn("github.com/jdpieck/Pre-Purchasing-Automation/issues", userscript)
-        self.assertIn("jdpieck@ucdavis.edu", userscript)
-        # Check that core logic from content.js is incorporated
-        self.assertIn("function fillPrePurchasingForm", userscript)
+        self.assertIn("handleFieldAutoSave", js, "Auto-save handler must exist in ui.js")
+        self.assertIn("showFieldSavedBadge", js, "showFieldSavedBadge function must exist in ui.js")
+        self.assertIn("addEventListener('blur'", js, "Must bind blur event for text inputs in ui.js")
+        self.assertIn("addEventListener('change'", js, "Must bind change event in ui.js")
 
     def test_mock_html_privacy_and_sanitization(self):
         """Verify mock HTML does not expose personal usernames, internal accounts, or personal emails."""
@@ -148,15 +148,10 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
         self.assertNotIn("yan24", html, "Specific approver login must be sanitized from mock HTML")
 
     def test_backorder_state_node_simulation(self):
-        """Execute Node simulation of tzCheckbox behavior to ensure false stays false and true turns true."""
+        """Execute Node simulation of tzCheckbox behavior using dom_helpers module."""
         import subprocess
         node_script = """
-        const fs = require('fs');
-        const code = fs.readFileSync('browser-extension/content.js', 'utf-8');
-        
-        // Extract setBackorderState function
-        const match = code.match(/function setBackorderState\\(allow\\)\\s*\\{([\\s\\S]*?)\\n  \\}/);
-        if (!match) process.exit(1);
+        const { setBackorderState } = require('./browser-extension/src/dom_helpers.js');
         
         function runTest(initChecked, allowTarget) {
           let checkbox = { checked: initChecked, setAttribute: () => {}, removeAttribute: () => {} };
@@ -181,8 +176,6 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
           };
           let tzContent = { textContent: initChecked ? 'Yes' : 'No' };
           
-          // Execute extracted logic with mocked environment
-          const func = new Function('allow', 'document', match[1]);
           const docMock = {
             querySelector: (sel) => {
               if (sel === 'input[name="backorder"]') {
@@ -194,7 +187,7 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
               return null;
             }
           };
-          func(allowTarget, docMock);
+          setBackorderState(allowTarget, docMock);
           return { checked: classes.has('checked'), text: tzContent.textContent };
         }
         
@@ -216,20 +209,10 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, f"Backorder Node simulation failed: {proc.stderr}")
 
     def test_copy_paste_tsv_node_simulation(self):
-        """Execute Node simulation of parseCSV with Google Sheets copied tab-separated data."""
+        """Execute Node simulation of parseCSV with parser module."""
         import subprocess
         node_script = """
-        const fs = require('fs');
-        const code = fs.readFileSync('browser-extension/content.js', 'utf-8');
-
-        // Extract parseCSV function
-        const match = code.match(/function parseCSV\\(text\\)\\s*\\{([\\s\\S]*?)\\n  \\}/);
-        if (!match) {
-          console.error('parseCSV not found');
-          process.exit(1);
-        }
-
-        const parseCSV = new Function('text', match[1]);
+        const { parseCSV } = require('./browser-extension/src/parser.js');
 
         const tsvData = `USANOOKS Microfiber Cleaning Cloth Grey - 12 Pcs (12.5"x12.5") - High Performance - 1200 Washes Ultra Absorbent Microfiber Towel Weave Grime & Liquid for Streak-Free Mirror Shine - Car Washing Cloth\\tB08BRJHJF9\\t1\\t$7.98\\t$7.98\\thttps://www.amazon.com/gp/product/B08BRJHJF9/ref=ox_sc_act_title_1?smid=A3J8SPWK5KKD5E&psc=1\\tAmazon\\tCleaning up the office + general tools
 Schneider Black Nitrile Exam Gloves Box of 100 Latex Free & Powder Free Disposable Gloves for Medical Food Prep & Cleaning Medium\\tB0FBGSPTPP\\t1\\t$7.19\\t$7.19\\thttps://www.amazon.com/gp/product/B0FBGSPTPP/ref=ox_sc_act_title_2?smid=A1UQTBRX1IU1GT&psc=1\\tAmazon\\tCleaning up the office + general tools
@@ -278,8 +261,9 @@ Cable Zip Ties400 Pack Black Assorted Sizes 12+8+6+4 InchMulti-Purpose Self-Lock
         self.assertEqual(proc.returncode, 0, f"Copy-paste TSV Node simulation failed: {proc.stderr}")
 
     def test_copy_paste_ui_handlers_and_branding(self):
-        """Verify content.js and userscript include copy-paste components and accessibility attributes."""
-        with open(JS_PATH, 'r', encoding='utf-8') as f:
+        """Verify ui.js includes copy-paste components and accessibility attributes."""
+        ui_path = os.path.join(SRC_DIR, 'ui.js')
+        with open(ui_path, 'r', encoding='utf-8') as f:
             code = f.read()
 
         self.assertIn("ucd-paste-input", code)
@@ -288,11 +272,46 @@ Cable Zip Ties400 Pack Black Assorted Sizes 12+8+6+4 InchMulti-Purpose Self-Lock
         self.assertIn("clipboard", code)
         self.assertIn("Paste Spreadsheet", code)
 
-        with open(USERSCRIPT_PATH, 'r', encoding='utf-8') as f:
-            userscript = f.read()
+    def test_modular_manifest_and_icons_architecture(self):
+        """Verify manifest.json has modular script sequence and icons reference the icons/ directory."""
+        self.assertTrue(os.path.exists(MANIFEST_PATH), "manifest.json must exist")
+        with open(MANIFEST_PATH, 'r', encoding='utf-8') as f:
+            manifest = json.load(f)
 
-        self.assertIn("ucd-paste-input", userscript)
-        self.assertIn("handleTextData", userscript)
+        js_files = manifest["content_scripts"][0]["js"]
+        expected_modules = [
+            "src/icons.js",
+            "src/constants.js",
+            "src/dom_helpers.js",
+            "src/parser.js",
+            "src/autofill.js",
+            "src/ui.js"
+        ]
+        self.assertEqual(js_files, expected_modules, "manifest.json must load modular scripts in exact sequence")
+
+        # Verify icons.js references files without hardcoded SVG paths
+        icons_js_path = os.path.join(SRC_DIR, 'icons.js')
+        with open(icons_js_path, 'r', encoding='utf-8') as f:
+            icons_js = f.read()
+
+        self.assertIn("ICON_FILES", icons_js)
+        self.assertIn("getIconUrl", icons_js)
+        self.assertNotIn("<path d=", icons_js, "icons.js must reference icons folder instead of hardcoding SVG path strings")
+
+        # Verify all icons mapped in ICON_FILES exist in browser-extension/icons/
+        for filename in ["zap.svg", "settings.svg", "help.svg", "close.svg", "upload.svg", "package.svg",
+                         "building.svg", "dollar.svg", "save.svg", "clear.svg", "mail.svg", "github.svg",
+                         "info.svg", "trash.svg", "file.svg", "clipboard.svg"]:
+            svg_path = os.path.join(ICONS_DIR, filename)
+            self.assertTrue(os.path.exists(svg_path), f"Icon file {filename} must exist in icons/ directory")
+
+        # Verify retired userscript files are not present
+        userscript_path = os.path.join(BASE_DIR, 'browser-extension', 'ucd_prepurchasing.user.js')
+        build_script_path = os.path.join(BASE_DIR, 'scripts', 'build_userscript.py')
+        content_js_path = os.path.join(BASE_DIR, 'browser-extension', 'content.js')
+        self.assertFalse(os.path.exists(userscript_path), "ucd_prepurchasing.user.js must be deleted")
+        self.assertFalse(os.path.exists(build_script_path), "build_userscript.py must be deleted")
+        self.assertFalse(os.path.exists(content_js_path), "content.js monolith must be replaced by src/ modules")
 
 if __name__ == '__main__':
     unittest.main()
