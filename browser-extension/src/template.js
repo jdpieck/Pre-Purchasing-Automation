@@ -294,7 +294,7 @@ function getDrawerHtml(options = {}) {
 
             <!-- Credits & Contact -->
             <div class="ucd-credits-card">
-              <div class="ucd-credits-header">Pre-Purchasing Assistant for UC Davis <span class="ucd-version-tag">Beta v0.1.0</span></div>
+              <div class="ucd-credits-header">Pre-Purchasing Assistant for UC Davis <span class="ucd-version-tag">Beta v0.2.0</span></div>
               <div class="ucd-credits-author">
                 Developed by <a href="https://jdpieck.github.io/" target="_blank" rel="noopener noreferrer" style="color: var(--ucd-blue); font-weight: 600; text-decoration: underline;">Jason Pieck</a> using <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" style="color: #1a73e8; font-weight: 600; text-decoration: underline;">Gemini</a>.
               </div>

@@ -2,7 +2,7 @@
 
 A lightweight browser extension designed to automate entering lab purchasing requests into the **UC Davis Pre-Purchasing System** (`https://prepurchasing.ucdavis.edu`).
 
-> **Status: Beta (v0.1.0)** — Actively tested with the UC Davis Pre-Purchasing order request portal.
+> **Status: Beta (v0.2.0)** — Actively tested with the UC Davis Pre-Purchasing order request portal.
 
 Instead of typing dozens of items, quantities, catalog numbers, URLs, and notes by hand, simply drag and drop your order CSV spreadsheet. The extension automatically fills every field, expands line items, sets approver routing, matches vendors and shipping addresses, and leaves the form ready for your final review.
 
