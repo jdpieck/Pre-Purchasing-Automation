@@ -268,47 +268,56 @@ function getDrawerHtml(options = {}) {
               <ul class="ucd-step-list">
                 <li class="ucd-step-item">
                   <span class="ucd-step-num">1</span>
-                  <span>Set up your personal details once under the <b>Settings</b> tab (Name, Email, Approver).</span>
+                  <span>Configure your personal details under <b>Settings</b> (Name, Email, Approver, and Default Order Justification). Fields auto-save instantly.</span>
                 </li>
                 <li class="ucd-step-item">
                   <span class="ucd-step-num">2</span>
-                  <span>Drop your lab order <code class="ucd-code-pill">.csv</code> file, or simply copy & paste cells directly from Google Sheets / Excel into the <b>Import Order</b> tab.</span>
+                  <span>Drop your order <code class="ucd-code-pill">.csv</code> file, or simply copy & paste cells directly from Google Sheets / Excel / McMaster / Amazon into the <b>Import Order</b> tab (<kbd>Ctrl+V</kbd>).</span>
                 </li>
                 <li class="ucd-step-item">
                   <span class="ucd-step-num">3</span>
-                  <span>Click <b>AutoFill Order Form</b> to populate all items and expand line details.</span>
+                  <span>If your import contains multiple vendors, click a vendor pill (e.g. <b>McMaster-Carr</b> or <b>Amazon</b>) to isolate that vendor's items.</span>
                 </li>
                 <li class="ucd-step-item">
                   <span class="ucd-step-num">4</span>
-                  <span>Review the calculated subtotals on screen and click <b>Create</b> or <b>Save For Later</b>.</span>
+                  <span>Click <b>AutoFill Order Form</b> to populate line items and routing, review subtotals on screen, and submit in the portal.</span>
                 </li>
               </ul>
             </div>
 
             <!-- CSV & Spreadsheet Format Reference -->
             <div class="ucd-help-card">
-              <h4>${ICONS.package} Expected Spreadsheet Columns</h4>
+              <h4>${ICONS.package} Flexible Column Ingestion & Auto-Derivation</h4>
               <p style="font-size: 11px; color: var(--ucd-text-muted); margin: 0 0 8px;">
-                Supports standard 8-column spreadsheets (headerless or with headers, CSV or copied Google Sheets/Excel table):
+                Supports standard 8-column spreadsheets as well as irregular lab finance tables (headerless or with headers, CSV or copied Excel/Google Sheets tables):
               </p>
               <div style="font-size: 11px; line-height: 1.8; color: #334155;">
-                1. <b>Item Name</b> (Description)<br/>
-                2. <b>ASIN / Catalog #</b> (Part number)<br/>
-                3. <b>Qty</b> (Quantity)<br/>
-                4. <b>Price (Unit)</b> (e.g. $7.98)<br/>
-                5. <b>Price (Total)</b> (Extended total)<br/>
+                1. <b>Item Name</b> (Description / Product title)<br/>
+                2. <b>ASIN / Catalog #</b> (Part number / SKU)<br/>
+                3. <b>Qty</b> (Quantity requested, defaults to 1 if omitted)<br/>
+                4. <b>Price (Unit)</b> (e.g. $7.98 or $ 25.44)<br/>
+                5. <b>Price (Total)</b> (Extended total price)<br/>
                 6. <b>Link</b> (Direct product URL)<br/>
-                7. <b>Vendor</b> (e.g. Amazon)<br/>
-                8. <b>Item Notes</b> (Line-item notes; order justification is set under Settings)
+                7. <b>Vendor</b> (e.g. McMaster-Carr, Amazon, Grainger)<br/>
+                8. <b>Item Notes</b> (Line-item specific notes)
+              </div>
+              <div style="font-size: 11px; color: #0369a1; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 8px 10px; margin-top: 10px; line-height: 1.5;">
+                ✨ <b>Smart Auto-Derivations</b>:<br/>
+                • <b>Missing Unit Price</b>: Automatically calculated from Total Price & Qty.<br/>
+                • <b>Missing Total Price</b>: Automatically calculated from Unit Price & Qty.<br/>
+                • <b>Missing Catalog # / ASIN</b>: Automatically extracted from Amazon (<code class="ucd-code-pill">/dp/B0...</code>) and McMaster-Carr (<code class="ucd-code-pill">mcmaster.com/...</code>) URLs.<br/>
+                • <b>Missing Vendor</b>: Automatically inferred from link domains (<code class="ucd-code-pill">mcmaster.com</code>, <code class="ucd-code-pill">amazon.com</code>, etc.).
               </div>
               <div style="font-size: 11px; color: var(--ucd-text-muted); margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--ucd-border); line-height: 1.5;">
-                💡 <b>Tip</b>: You can copy cells directly in Google Sheets or Excel (Ctrl+C) and press <b>Ctrl+V</b> in the Import tab! Or use the <a href="https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln" target="_blank" rel="noopener noreferrer" style="color: var(--ucd-blue); font-weight: 600; text-decoration: underline;">AMZ Cart Export</a> extension to export Amazon carts.
+                🏷️ <b>Multi-Vendor Orders</b>: UC Davis allows only 1 vendor per request. When a mixed spreadsheet is imported, AutoFill is locked for "All Vendors". Click each vendor pill to autofill and submit each vendor's order sequentially without re-copying.<br/><br/>
+                📝 <b>Notes vs Justification</b>: Column 8 is for <i>individual line-item notes</i>. Overall order justification is set under the <b>Settings</b> tab.<br/><br/>
+                💡 <b>Amazon Tip</b>: Use the <a href="https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln" target="_blank" rel="noopener noreferrer" style="color: var(--ucd-blue); font-weight: 600; text-decoration: underline;">AMZ Cart Export</a> extension to download Amazon carts directly into CSV.
               </div>
             </div>
 
             <!-- Credits & Contact -->
             <div class="ucd-credits-card">
-              <div class="ucd-credits-header">Pre-Purchasing Assistant for UC Davis <span class="ucd-version-tag">Beta v0.2.0</span></div>
+              <div class="ucd-credits-header">Pre-Purchasing Assistant for UC Davis <span class="ucd-version-tag">Beta v0.3.0</span></div>
               <div class="ucd-credits-author">
                 Developed by <a href="https://jdpieck.github.io/" target="_blank" rel="noopener noreferrer" style="color: var(--ucd-blue); font-weight: 600; text-decoration: underline;">Jason Pieck</a> using <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" style="color: #1a73e8; font-weight: 600; text-decoration: underline;">Gemini</a>.
               </div>

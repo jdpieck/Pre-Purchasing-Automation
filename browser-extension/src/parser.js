@@ -78,10 +78,33 @@ function inferVendorFromUrl(url) {
   return '';
 }
 
-function extractAsinFromUrl(url) {
+function extractCatalogNumberFromUrl(url) {
   if (!url || typeof url !== 'string') return '';
-  const match = url.match(/(?:dp|gp\/product|product-reviews)\/([A-Z0-9]{10})/i);
-  return match ? match[1].toUpperCase() : '';
+  const trimmed = url.trim();
+
+  // Amazon ASIN (e.g. /dp/B08BRJHJF9 or /gp/product/B08BRJHJF9)
+  const asinMatch = trimmed.match(/(?:dp|gp\/product|product-reviews)\/([A-Z0-9]{10})/i);
+  if (asinMatch) return asinMatch[1].toUpperCase();
+
+  // McMaster-Carr catalog/part number (e.g. mcmaster.com/89205K161/ or /4974T226/)
+  const mcmasterMatch = trimmed.match(/mcmaster\.com\/([0-9]+[A-Z0-9]+|[A-Z0-9]+[0-9]+[A-Z0-9]*)/i);
+  if (mcmasterMatch && mcmasterMatch[1] && !['order', 'cart', 'help'].includes(mcmasterMatch[1].toLowerCase())) {
+    return mcmasterMatch[1].toUpperCase();
+  }
+
+  return '';
+}
+
+function extractAsinFromUrl(url) {
+  return extractCatalogNumberFromUrl(url);
+}
+
+function isCurrencyCell(val) {
+  if (!val) return false;
+  const t = String(val).trim();
+  // Matches $ 25.44, $25.44, 25.44, $1,250.00, etc.
+  return (/^\$?\s*\d+(?:,\d{3})*(?:\.\d{1,2})?$/.test(t) && (t.includes('$') || t.includes('.')))
+      || (/^\$?\s*\d+\.\d{2}$/.test(t));
 }
 
 function cleanPriceNum(str) {
@@ -195,15 +218,36 @@ function inferHeaderlessMapping(rows) {
     }
   }
 
-  // 3. Detect Quantity column (>60% integer numbers under 1000)
+  // 3. Detect Price columns (>50% currency format: $?digits.digits with decimal or $)
+  const priceCols = [];
+  for (let c = 0; c < numCols; c++) {
+    if (assignedCols.has(c)) continue;
+    const nonBlank = sample.map(r => r[c] || '').filter(val => val.trim().length > 0);
+    if (nonBlank.length > 0) {
+      const priceMatches = nonBlank.filter(isCurrencyCell).length;
+      if (priceMatches / nonBlank.length >= 0.5) {
+        priceCols.push(c);
+        assignedCols.add(c);
+      }
+    }
+  }
+
+  if (priceCols.length === 1) {
+    mapping.unitPrice = priceCols[0];
+  } else if (priceCols.length >= 2) {
+    mapping.unitPrice = priceCols[0];
+    mapping.totalPrice = priceCols[1];
+  }
+
+  // 4. Detect Quantity column (>60% integer numbers under 10000, no currency symbols or decimals)
   for (let c = 0; c < numCols; c++) {
     if (assignedCols.has(c)) continue;
     const nonBlank = sample.map(r => r[c] || '').filter(val => val.trim().length > 0);
     if (nonBlank.length > 0) {
       const qtyMatches = nonBlank.filter(val => {
-        const cleaned = val.replace(/[^0-9]/g, '');
-        const n = parseInt(cleaned, 10);
-        return /^\d+$/.test(val.trim()) && !Number.isNaN(n) && n > 0 && n < 10000;
+        const t = val.trim();
+        const n = parseInt(t, 10);
+        return /^\d{1,4}(\s*(ea|pcs|units?|box|pk|pack))?$/i.test(t) && !t.includes('$') && !t.includes('.') && !Number.isNaN(n) && n > 0 && n < 10000;
       }).length;
       if (qtyMatches / nonBlank.length >= 0.6) {
         mapping.qty = c;
@@ -213,29 +257,6 @@ function inferHeaderlessMapping(rows) {
     }
   }
 
-  // 4. Detect Price columns (>50% currency format: $?digits.digits)
-  const priceCols = [];
-  for (let c = 0; c < numCols; c++) {
-    if (assignedCols.has(c)) continue;
-    const nonBlank = sample.map(r => r[c] || '').filter(val => val.trim().length > 0);
-    if (nonBlank.length > 0) {
-      const priceMatches = nonBlank.filter(val => /^\$?\d+(\.\d{1,2})?$/.test(val.trim())).length;
-      if (priceMatches / nonBlank.length >= 0.5) {
-        priceCols.push(c);
-        assignedCols.add(c);
-      }
-    }
-  }
-
-  if (priceCols.length === 1) {
-    // If only one price column, assume unitPrice (or totalPrice if quantity is present)
-    mapping.unitPrice = priceCols[0];
-  } else if (priceCols.length >= 2) {
-    // Two price columns: unitPrice followed by totalPrice
-    mapping.unitPrice = priceCols[0];
-    mapping.totalPrice = priceCols[1];
-  }
-
   // 5. Detect Vendor column (known vendor names or short title-case words)
   for (let c = 0; c < numCols; c++) {
     if (assignedCols.has(c)) continue;
@@ -243,7 +264,7 @@ function inferHeaderlessMapping(rows) {
     if (nonBlank.length > 0) {
       const vendorMatches = nonBlank.filter(val => {
         const v = val.trim().toLowerCase();
-        return ['amazon', 'mcmaster', 'mcmaster-carr', 'grainger', 'digikey', 'mouser', 'vwr', 'fisher scientific'].some(k => v.includes(k));
+        return ['amazon', 'mcmaster', 'mcmaster-carr', 'mcmaster carr', 'grainger', 'digikey', 'mouser', 'vwr', 'fisher'].some(k => v.includes(k));
       }).length;
       if (vendorMatches / nonBlank.length >= 0.4) {
         mapping.vendor = c;
@@ -268,7 +289,7 @@ function inferHeaderlessMapping(rows) {
 
   // Fallback defaults if still unmapped
   if (mapping.name === undefined) mapping.name = 0;
-  if (mapping.qty === undefined) mapping.qty = 1;
+  // NOTE: Do NOT default mapping.qty = 1! If quantity is not present, it stays undefined so extractAndDeriveItem defaults each item to 1 safely.
 
   return mapping;
 }
@@ -288,9 +309,17 @@ function extractAndDeriveItem(r, mapping) {
   const rawVendor = getVal('vendor');
   const rawNotes = getVal('notes');
 
-  // 1. Quantity: default to 1 if missing or invalid
-  const parsedQty = parseInt(String(rawQty).replace(/[^0-9]/g, ''), 10);
-  const qty = (!Number.isNaN(parsedQty) && parsedQty > 0) ? parsedQty : 1;
+  // 1. Quantity: default to 1 if missing, invalid, or misidentified as price
+  let qty = 1;
+  if (rawQty) {
+    const trimmed = String(rawQty).trim();
+    if (!trimmed.includes('$') && !/\.\d{2}$/.test(trimmed)) {
+      const parsedQty = parseInt(trimmed, 10);
+      if (!Number.isNaN(parsedQty) && parsedQty > 0) {
+        qty = parsedQty;
+      }
+    }
+  }
 
   // 2. Unit and Total Price Derivations
   let unitNum = cleanPriceNum(rawUnitPrice);
@@ -310,17 +339,23 @@ function extractAndDeriveItem(r, mapping) {
   const unitPriceStr = unitNum.toFixed(2);
   const totalPriceStr = totalNum.toFixed(2);
 
-  // 3. ASIN Derivation from URL if missing
+  // 3. ASIN / Catalog # Derivation from URL if missing
   let asin = rawAsin;
   let url = rawUrl;
   if (!asin && url) {
-    asin = extractAsinFromUrl(url);
+    asin = extractCatalogNumberFromUrl(url);
   }
 
-  // 4. Vendor Derivation from URL if missing
+  // 4. Vendor Derivation from URL or normalization
   let vendor = rawVendor;
   if (!vendor && url) {
     vendor = inferVendorFromUrl(url);
+  } else if (vendor) {
+    if (/mcmaster(\s*carr)?/i.test(vendor)) {
+      vendor = 'McMaster-Carr';
+    } else if (/amazon/i.test(vendor)) {
+      vendor = 'Amazon';
+    }
   }
 
   const notes = rawNotes;
@@ -439,6 +474,8 @@ if (typeof window !== 'undefined') {
   window.COLUMN_SYNONYMS = COLUMN_SYNONYMS;
   window.inferVendorFromUrl = inferVendorFromUrl;
   window.extractAsinFromUrl = extractAsinFromUrl;
+  window.extractCatalogNumberFromUrl = extractCatalogNumberFromUrl;
+  window.isCurrencyCell = isCurrencyCell;
   window.isHeaderRow = isHeaderRow;
   window.mapHeaders = mapHeaders;
   window.inferHeaderlessMapping = inferHeaderlessMapping;
@@ -450,6 +487,8 @@ if (typeof module !== 'undefined' && module.exports) {
     COLUMN_SYNONYMS,
     inferVendorFromUrl,
     extractAsinFromUrl,
+    extractCatalogNumberFromUrl,
+    isCurrencyCell,
     isHeaderRow,
     mapHeaders,
     inferHeaderlessMapping,

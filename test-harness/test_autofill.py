@@ -436,5 +436,42 @@ Cable Zip Ties400 Pack Black Assorted Sizes 12+8+6+4 InchMulti-Purpose Self-Lock
         self.assertIn(".ucd-vendor-pill", css, "styles.css must style vendor filter pills")
         self.assertIn(".ucd-date-preview", css, "styles.css must style date preview label")
 
+    def test_mcmaster_irregular_order_parsing(self):
+        """Verify 4-column McMaster order with unescaped inch marks, spaces in price, and no quantity column."""
+        import subprocess
+        node_script = """
+        const { parseCSV } = require('./browser-extension/src/parser.js');
+        const text = [
+          '3/8 hex SS bar\\t $ 25.44 \\t https://www.mcmaster.com/89205K161/ \\tMcMaster Carr',
+          'USB C Cable\\t $ 21.27 \\t https://www.mcmaster.com/4974T226/ \\tMcMaster Carr',
+          '1/8" dash 255 O ring\\t $ 6.99 \\t https://www.mcmaster.com/9452K356/ \\tMcMaster Carr',
+          '3/4" #4-40 BHCS\\t $ 5.17 \\t https://www.mcmaster.com/98164A434/ \\tMcMaster Carr',
+          '1/16 hex keys\\t $ 1.65 \\t https://www.mcmaster.com/7122A39/ \\tMcMaster Carr',
+          '1/8 hex keys\\t $ 2.30 \\t https://www.mcmaster.com/7122A44/ \\tMcMaster Carr',
+          '1-3/8 1/4-20 BHCS\\t $ 9.20 \\t https://www.mcmaster.com/92949A836/ \\tMcMaster Carr'
+        ].join('\\n');
+
+        const items = parseCSV(text);
+        console.log(JSON.stringify(items));
+        """
+        proc = subprocess.run(['node', '-e', node_script], cwd=BASE_DIR, capture_output=True, text=True, check=True)
+        items = json.loads(proc.stdout.strip())
+
+        self.assertEqual(len(items), 7, "All 7 McMaster items must be parsed")
+
+        item0 = items[0]
+        self.assertEqual(item0['name'], "3/8 hex SS bar")
+        self.assertEqual(item0['qty'], 1, "Quantity must default to 1, not price digits")
+        self.assertEqual(item0['unitPrice'], "25.44", "Price must be accurately parsed without space corruption")
+        self.assertEqual(item0['totalPrice'], "25.44")
+        self.assertEqual(item0['asin'], "89205K161", "McMaster part number must be extracted from URL")
+        self.assertEqual(item0['vendor'], "McMaster-Carr", "Vendor must be normalized")
+
+        item2 = items[2]
+        self.assertEqual(item2['name'], '1/8" dash 255 O ring', "Unescaped inch mark in title must be preserved")
+        self.assertEqual(item2['qty'], 1)
+        self.assertEqual(item2['unitPrice'], "6.99")
+        self.assertEqual(item2['asin'], "9452K356")
+
 if __name__ == '__main__':
     unittest.main()

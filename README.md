@@ -2,7 +2,7 @@
 
 A lightweight browser extension designed to automate entering lab purchasing requests into the **UC Davis Pre-Purchasing System** (`https://prepurchasing.ucdavis.edu`).
 
-> **Status: Beta (v0.2.0)** — Actively tested with the UC Davis Pre-Purchasing order request portal.
+> **Status: Beta (v0.3.0)** — Actively tested with the UC Davis Pre-Purchasing order request portal.
 
 Instead of typing dozens of items, quantities, catalog numbers, URLs, and notes by hand, simply drag and drop your order CSV spreadsheet. The extension automatically fills every field, expands line items, sets approver routing, matches vendors and shipping addresses, and leaves the form ready for your final review.
 
@@ -45,31 +45,33 @@ You do **not** need browser store approval to install and use this tool. Follow 
 
 1. Navigate to your UC Davis Pre-Purchasing order request page (e.g. `https://prepurchasing.ucdavis.edu/Order/Request/<workgroup-id>`).
 2. Click the floating **`⚡ AutoFill Order`** pill button in the bottom-right corner.
-3. **First-time setup**: Switch to the **Settings** tab and enter your personal details (Deliver To Name, Phone, Email, Shipping Address keyword, Approver, and Backorder preference). Click **Save Settings** (this only needs to be done once per browser).
-4. In the **Import Order** tab, drag and drop your order CSV file (or click to browse).
-5. Inspect the summary badges (item count, detected vendor, subtotal) and the item preview list. (To start over with another file, simply click **Clear**).
+3. **First-time setup**: Switch to the **Settings** tab and enter your personal details (Deliver To Name, Phone, Email, Shipping Address keyword, Approver, Backorder preference, and Default Order Justification). Fields auto-save automatically as you leave each field.
+4. In the **Import Order** tab, drag and drop your order CSV file or paste spreadsheet cells (<kbd>Ctrl+V</kbd>).
+5. **Multi-Vendor Handling**: If your import contains items for multiple vendors (e.g. McMaster-Carr and Amazon), click the desired vendor pill to filter the order. (UC Davis requires separate requests per vendor).
 6. Click **`⚡ AutoFill Order Form`**.
 7. Watch as the extension:
-   - Fills Justification and Business Purpose.
-   - Matches and selects the Vendor (e.g., *Amazon Capital Services*).
+   - Fills Justification and Business Purpose (from Settings or first line item).
+   - Matches and selects the Vendor (e.g., *Amazon Capital Services* or *McMaster-Carr Supply Company*).
    - Enters recipient name, phone, email, and selects your Shipping Address.
    - Selects "Approver & Account Manager" with your specified Approver.
-   - Calculates and sets the Date Needed (today + 7 days), Standard shipping, and Backorder preference.
-   - Adds necessary line item rows and fills Quantity, Units (*Each*), ASIN, Description, and Price.
+   - Calculates and sets the Date Needed (today + offset days), Standard shipping, and Backorder preference.
+   - Adds necessary line item rows and fills Quantity, Units (*Each*), ASIN / Catalog #, Description, and Price.
    - Expands line details to fill Product URLs and Item Notes.
 8. Review the populated form on screen and click **Create** or **Save For Later**.
 
 ---
 
-## CSV Spreadsheet Format
+## Spreadsheet Formats & Auto-Derivations
 
-The extension expects a standard CSV with the following 8 columns (headerless or with header row):
+The assistant supports standard 8-column spreadsheets as well as irregular lab finance spreadsheets (with or without headers, CSV files or copied Excel / Google Sheets tables):
+
+### Standard 8-Column Format
 
 | Column # | Field Name | Description | Example |
 | :---: | :--- | :--- | :--- |
 | **1** | `Item Name` | Full description of the item | `USANOOKS Microfiber Cleaning Cloth Grey - 12 Pcs` |
 | **2** | `ASIN / Catalog #` | Vendor part number or Amazon ASIN | `B08BRJHJF9` |
-| **3** | `Qty` | Quantity of units requested | `1` |
+| **3** | `Qty` | Quantity of units requested (defaults to 1 if omitted) | `1` |
 | **4** | `Price (Unit)` | Unit price (with or without `$`) | `$7.98` |
 | **5** | `Price (Total)` | Extended total price | `$7.98` |
 | **6** | `Link` | Direct product URL | `https://www.amazon.com/gp/product/B08BRJHJF9...` |
@@ -77,6 +79,27 @@ The extension expects a standard CSV with the following 8 columns (headerless or
 | **8** | `Item Notes` | Line-item notes (order justification is in Settings) | `Cleaning up the office + general tools` |
 
 See [`examples/Example Amazon Purchase Data.csv`](examples/Example%20Amazon%20Purchase%20Data.csv) for a full working sample.
+
+### Irregular Finance Tables & Smart Auto-Derivations
+
+Lab accounting and export sheets often have custom column arrangements, missing ASINs, or omitted unit prices. The assistant's ingestion engine handles these automatically:
+
+- **Missing Unit Price**: Calculated automatically if only Total Price and Qty are present ($\text{unitPrice} = \text{totalPrice} / \text{qty}$).
+- **Missing Total Price**: Calculated automatically if only Unit Price and Qty are present ($\text{totalPrice} = \text{unitPrice} \times \text{qty}$).
+- **Part Number & ASIN Extraction**: Extracted directly from product links:
+  - Amazon ASINs: `/(?:dp|gp\/product)\/([A-Z0-9]{10})/i`
+  - McMaster-Carr catalog numbers: `mcmaster.com/<part#>` (e.g. `89205K161`, `4974T226`)
+- **Vendor Inference**: Extracted from link domains (`mcmaster.com` $\to$ `McMaster-Carr`, `amazon.com` $\to$ `Amazon`, `grainger.com` $\to$ `Grainger`, `digikey.com` $\to$ `DigiKey`, etc.).
+- **Missing Quantities**: Safe fallback to `1` unit when no quantity column is present (e.g. 4-column tables: `[Description] [Price] [Link] [Vendor]`).
+- **Quote & Inch Mark Invariant**: Handles unescaped inch marks in product titles (e.g. `1/8" dash 255 O ring` or `(12.5"x12.5")`) without breaking delimiters.
+
+### Multi-Vendor Isolation Workflow
+
+UC Davis Pre-Purchasing restricts each order request to a single vendor. When mixed vendors are detected:
+1. AutoFill is locked for "All Vendors" to prevent mixed submissions.
+2. Filter pills appear (`[● All Vendors] [○ McMaster-Carr] [○ Amazon]`).
+3. Click a vendor pill to isolate items for that vendor and unlock AutoFill.
+4. Fill and submit the request in the portal, then select the next vendor pill to populate the remaining items—**no spreadsheet re-copying required**.
 
 ### 💡 Recommended Workflow: Exporting Amazon Carts to CSV
 
