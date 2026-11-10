@@ -274,11 +274,122 @@
   font-size: 11px;
 }
 
+/* Import Input Container & Segmented Subtabs */
+.ucd-import-input-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.ucd-import-subtabs {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 4px;
+  margin-bottom: 12px;
+  border: 1px solid var(--ucd-border);
+}
+
+.ucd-subtab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ucd-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ucd-subtab-btn .subtab-icon {
+  display: flex;
+  align-items: center;
+}
+
+.ucd-subtab-btn .subtab-icon svg {
+  fill: none;
+  stroke: currentColor;
+}
+
+.ucd-subtab-btn:hover:not(.active) {
+  color: var(--ucd-text);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.ucd-subtab-btn.active {
+  background: #ffffff;
+  color: var(--ucd-blue);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ucd-subtab-btn.active .subtab-icon svg {
+  stroke: var(--ucd-blue);
+}
+
+.ucd-subview {
+  width: 100%;
+}
+
+.dropzone-subhint {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--ucd-blue);
+  background: #eef4ff;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid #bfdbfe;
+}
+
+/* Direct Paste View */
+.ucd-paste-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ucd-paste-textarea {
+  width: 100%;
+  height: 160px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #1e293b;
+  background: #ffffff;
+  resize: vertical;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ucd-paste-textarea:focus {
+  outline: none;
+  border-color: var(--ucd-blue);
+  box-shadow: 0 0 0 3px rgba(2, 40, 89, 0.12);
+}
+
+.ucd-paste-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 /* Dropzone (Full size) */
 .ucd-dropzone {
   border: 2px dashed #cbd5e1;
   border-radius: 10px;
-  padding: 32px 16px;
+  padding: 28px 16px;
   text-align: center;
   background: var(--ucd-bg);
   cursor: pointer;
@@ -682,6 +793,11 @@
   align-items: center;
   gap: 6px;
   transition: all 0.15s ease;
+}
+
+.ucd-btn svg {
+  fill: none;
+  stroke: currentColor;
 }
 
 .ucd-btn-primary {

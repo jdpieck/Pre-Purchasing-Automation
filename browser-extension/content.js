@@ -46,7 +46,8 @@
     github: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="GitHub"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>`,
     info: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
     trash: `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Clear File"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
-    fileText: `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="File"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>`
+    fileText: `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="File"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>`,
+    clipboard: `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Clipboard"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>`
   };
 
   function getSettings() {
@@ -69,8 +70,20 @@
     }
   }
 
-  // --- CSV Parser ---
+  // --- CSV & Spreadsheet Parser ---
   function parseCSV(text) {
+    if (!text || typeof text !== 'string') return [];
+
+    // Auto-detect delimiter: tabs (TSV / Google Sheets / Excel copy-paste) vs commas (CSV)
+    const sampleLines = text.split(/\r?\n/).filter(l => l.trim().length > 0).slice(0, 5);
+    let delimiter = ',';
+    if (sampleLines.length > 0) {
+      const tabLines = sampleLines.filter(l => l.includes('\t')).length;
+      if (tabLines >= Math.ceil(sampleLines.length / 2)) {
+        delimiter = '\t';
+      }
+    }
+
     const lines = [];
     let row = [];
     let inQuotes = false;
@@ -81,13 +94,25 @@
       const nextChar = text[i + 1];
 
       if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          token += '"';
-          i++; // skip escaped quote
+        if (!inQuotes) {
+          // Enter quote mode if quote is at the beginning of the field
+          if (token.trim().length === 0) {
+            token = '';
+            inQuotes = true;
+          } else {
+            // Literal quote inside an unquoted field (e.g. 12" Ruler or (12.5"x12.5"))
+            token += '"';
+          }
         } else {
-          inQuotes = !inQuotes;
+          // Inside quoted field: check for escaped quote ("") or closing quote
+          if (nextChar === '"') {
+            token += '"';
+            i++; // skip escaped quote
+          } else {
+            inQuotes = false;
+          }
         }
-      } else if (char === ',' && !inQuotes) {
+      } else if (char === delimiter && !inQuotes) {
         row.push(token.trim());
         token = '';
       } else if ((char === '\r' || char === '\n') && !inQuotes) {
@@ -555,18 +580,57 @@
               <button class="ucd-btn ucd-btn-primary ucd-onboarding-btn" id="ucd-goto-settings-btn">Go to Settings →</button>
             </div>
 
-            <!-- Full-size Dropzone (Visible before file upload) -->
-            <div class="ucd-dropzone" id="ucd-dropzone">
-              <div class="dropzone-icon">${ICONS.upload}</div>
-              <div class="dropzone-title">Drop your CSV order file here</div>
-              <div class="dropzone-desc">or click to browse from your computer</div>
-              <input type="file" id="ucd-csv-file" accept=".csv,text/csv" style="display:none;" />
+            <!-- Import Source Selector & Input Area (Visible before data loaded) -->
+            <div class="ucd-import-input-container" id="ucd-import-input-container">
+              <!-- Segmented Subtabs: Upload CSV vs Paste Spreadsheet -->
+              <div class="ucd-import-subtabs">
+                <button type="button" class="ucd-subtab-btn active" id="subtab-upload-btn" data-subtab="upload">
+                  <span class="subtab-icon">${ICONS.upload}</span>
+                  <span>Upload CSV</span>
+                </button>
+                <button type="button" class="ucd-subtab-btn" id="subtab-paste-btn" data-subtab="paste">
+                  <span class="subtab-icon">${ICONS.clipboard}</span>
+                  <span>Paste Spreadsheet</span>
+                </button>
+              </div>
+
+              <!-- Subview 1: Dropzone File Upload -->
+              <div class="ucd-subview" id="ucd-subview-upload">
+                <div class="ucd-dropzone" id="ucd-dropzone">
+                  <div class="dropzone-icon">${ICONS.upload}</div>
+                  <div class="dropzone-title">Drop your CSV order file here</div>
+                  <div class="dropzone-desc">or click to browse from your computer</div>
+                  <div class="dropzone-subhint">Tip: You can also press <b>Ctrl+V</b> anytime to paste spreadsheet rows</div>
+                  <input type="file" id="ucd-csv-file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain" style="display:none;" />
+                </div>
+              </div>
+
+              <!-- Subview 2: Direct Paste Area -->
+              <div class="ucd-subview" id="ucd-subview-paste" style="display: none;">
+                <div class="ucd-paste-container">
+                  <textarea id="ucd-paste-input" class="ucd-paste-textarea" placeholder="Copy rows from Google Sheets or Excel and paste here (Ctrl+V)...&#10;&#10;Supports 8 columns:&#10;Item Name | ASIN | Qty | Unit Price | Total Price | Link | Vendor | Purpose"></textarea>
+                  <div class="ucd-paste-actions">
+                    <button type="button" class="ucd-btn ucd-btn-primary" id="ucd-parse-paste-btn">
+                      ${ICONS.zap}
+                      <span>Parse Pasted Items</span>
+                    </button>
+                    <button type="button" class="ucd-btn ucd-btn-secondary" id="ucd-read-clipboard-btn" title="Paste directly from clipboard">
+                      ${ICONS.clipboard}
+                      <span>Paste from Clipboard</span>
+                    </button>
+                    <button type="button" class="ucd-btn ucd-btn-secondary" id="ucd-clear-paste-btn" title="Clear paste box">
+                      ${ICONS.trash}
+                      <span>Clear</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Compact Uploaded File Bar (Visible after file upload) -->
             <div class="ucd-file-active-card" id="ucd-file-active-card" style="display: none;">
               <div class="ucd-file-active-info">
-                <span class="ucd-file-active-icon">${ICONS.fileText}</span>
+                <span class="ucd-file-active-icon" id="ucd-active-file-icon">${ICONS.fileText}</span>
                 <span class="ucd-file-name" id="ucd-active-file-name">file.csv</span>
               </div>
               <div class="ucd-file-actions">
@@ -689,7 +753,7 @@
                   </li>
                   <li class="ucd-step-item">
                     <span class="ucd-step-num">2</span>
-                    <span>Drag and drop your lab order <code class="ucd-code-pill">.csv</code> file into the <b>Import Order</b> tab.</span>
+                    <span>Drop your lab order <code class="ucd-code-pill">.csv</code> file, or simply copy & paste cells directly from Google Sheets / Excel into the <b>Import Order</b> tab.</span>
                   </li>
                   <li class="ucd-step-item">
                     <span class="ucd-step-num">3</span>
@@ -702,11 +766,11 @@
                 </ul>
               </div>
 
-              <!-- CSV Format Reference -->
+              <!-- CSV & Spreadsheet Format Reference -->
               <div class="ucd-help-card">
-                <h4>${ICONS.package} Expected CSV Columns</h4>
+                <h4>${ICONS.package} Expected Spreadsheet Columns</h4>
                 <p style="font-size: 11px; color: var(--ucd-text-muted); margin: 0 0 8px;">
-                  Supports standard 8-column spreadsheets (headerless or with headers):
+                  Supports standard 8-column spreadsheets (headerless or with headers, CSV or copied Google Sheets/Excel table):
                 </p>
                 <div style="font-size: 11px; line-height: 1.8; color: #334155;">
                   1. <b>Item Name</b> (Description)<br/>
@@ -719,7 +783,7 @@
                   8. <b>Purpose description</b> (Item notes / justification)
                 </div>
                 <div style="font-size: 11px; color: var(--ucd-text-muted); margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--ucd-border); line-height: 1.5;">
-                  💡 <b>Tip</b>: For Amazon carts, you can use the <a href="https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln" target="_blank" rel="noopener noreferrer" style="color: var(--ucd-blue); font-weight: 600; text-decoration: underline;">AMZ Cart Export</a> extension to export columns 1–6, then simply add columns 7 (Vendor) and 8 (Notes).
+                  💡 <b>Tip</b>: You can copy cells directly in Google Sheets or Excel (Ctrl+C) and press <b>Ctrl+V</b> in the Import tab! Or use the <a href="https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln" target="_blank" rel="noopener noreferrer" style="color: var(--ucd-blue); font-weight: 600; text-decoration: underline;">AMZ Cart Export</a> extension to export Amazon carts.
                 </div>
               </div>
 
@@ -754,8 +818,18 @@
     const launcher = document.getElementById('ucd-autofill-launcher');
     const panel = document.getElementById('ucd-autofill-panel');
     const minimizeBtn = document.getElementById('ucd-minimize-btn');
+    const importInputContainer = document.getElementById('ucd-import-input-container');
+    const subtabUploadBtn = document.getElementById('subtab-upload-btn');
+    const subtabPasteBtn = document.getElementById('subtab-paste-btn');
+    const subviewUpload = document.getElementById('ucd-subview-upload');
+    const subviewPaste = document.getElementById('ucd-subview-paste');
+    const pasteInput = document.getElementById('ucd-paste-input');
+    const parsePasteBtn = document.getElementById('ucd-parse-paste-btn');
+    const readClipboardBtn = document.getElementById('ucd-read-clipboard-btn');
+    const clearPasteBtn = document.getElementById('ucd-clear-paste-btn');
     const dropzone = document.getElementById('ucd-dropzone');
     const fileCard = document.getElementById('ucd-file-active-card');
+    const activeFileIcon = document.getElementById('ucd-active-file-icon');
     const activeFileName = document.getElementById('ucd-active-file-name');
     const clearFileBtn = document.getElementById('ucd-clear-file-btn');
     const fileInput = document.getElementById('ucd-csv-file');
@@ -864,6 +938,84 @@
       showSettingsStatus('Settings cleared', 'info');
     });
 
+    // Subtab switching (Upload CSV vs Paste Spreadsheet)
+    if (subtabUploadBtn && subtabPasteBtn) {
+      subtabUploadBtn.addEventListener('click', () => {
+        subtabUploadBtn.classList.add('active');
+        subtabPasteBtn.classList.remove('active');
+        subviewUpload.style.display = 'block';
+        subviewPaste.style.display = 'none';
+      });
+
+      subtabPasteBtn.addEventListener('click', () => {
+        subtabPasteBtn.classList.add('active');
+        subtabUploadBtn.classList.remove('active');
+        subviewPaste.style.display = 'block';
+        subviewUpload.style.display = 'none';
+        pasteInput.focus();
+      });
+    }
+
+    // Direct paste action buttons
+    if (parsePasteBtn) {
+      parsePasteBtn.addEventListener('click', () => {
+        handleTextData(pasteInput.value, 'Pasted Spreadsheet Data', true);
+      });
+    }
+
+    if (clearPasteBtn) {
+      clearPasteBtn.addEventListener('click', () => {
+        pasteInput.value = '';
+        pasteInput.focus();
+      });
+    }
+
+    if (readClipboardBtn) {
+      readClipboardBtn.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            const text = await navigator.clipboard.readText();
+            if (text && text.trim().length > 0) {
+              pasteInput.value = text;
+              handleTextData(text, 'Pasted Spreadsheet Data', true);
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn('Clipboard readText failed or permission denied:', err);
+        }
+        // Fallback: switch to paste subtab and focus textarea
+        if (subtabPasteBtn) subtabPasteBtn.click();
+        pasteInput.focus();
+      });
+    }
+
+    // Auto-parse on paste inside textarea
+    if (pasteInput) {
+      pasteInput.addEventListener('paste', (e) => {
+        const text = e.clipboardData ? e.clipboardData.getData('text/plain') : '';
+        if (text && text.trim().length > 0) {
+          setTimeout(() => {
+            handleTextData(text, 'Pasted Spreadsheet Data', true);
+          }, 50);
+        }
+      });
+    }
+
+    // Global paste listener on panel drawer for instant import from anywhere in import tab
+    panel.addEventListener('paste', (e) => {
+      const activeTabBtn = root.querySelector('.ucd-tab-btn.active');
+      if (!activeTabBtn || activeTabBtn.dataset.tab !== 'import') return;
+      if (e.target.id === 'ucd-paste-input') return; // Handled by textarea listener
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      const text = e.clipboardData ? e.clipboardData.getData('text/plain') : '';
+      if (text && text.trim().length > 0) {
+        e.preventDefault();
+        handleTextData(text, 'Pasted Spreadsheet Data', true);
+      }
+    });
+
     // File Handling
     dropzone.addEventListener('click', () => fileInput.click());
 
@@ -894,18 +1046,37 @@
       currentParsedItems = [];
       currentFileName = "";
       fileInput.value = "";
+      pasteInput.value = "";
       summarySection.style.display = "none";
       fileCard.style.display = "none";
-      dropzone.style.display = "block";
+      importInputContainer.style.display = "flex";
       statusBox.className = "ucd-status-box";
       statusBox.textContent = "";
     }
 
     clearFileBtn.addEventListener('click', resetUploadedFile);
 
+    function handleTextData(text, sourceName, isPasted = false) {
+      if (!text || !text.trim()) {
+        alert('No spreadsheet data provided to parse.');
+        return;
+      }
+
+      const items = parseCSV(text);
+      if (items.length === 0) {
+        alert('Could not find valid items in data. Please ensure it contains columns for Item Name and Part #/Qty.');
+        return;
+      }
+
+      currentParsedItems = items;
+      currentFileName = sourceName || (isPasted ? 'Pasted Spreadsheet Data' : 'Imported Data');
+      renderPreview(currentParsedItems, currentFileName, isPasted);
+    }
+
     function handleFile(file) {
-      if (!file.name.toLowerCase().endsWith('.csv')) {
-        alert('Please select a valid .csv file.');
+      const name = file.name.toLowerCase();
+      if (!name.endsWith('.csv') && !name.endsWith('.tsv') && !name.endsWith('.txt')) {
+        alert('Please select a valid .csv or spreadsheet file.');
         return;
       }
 
@@ -913,21 +1084,18 @@
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target.result;
-        currentParsedItems = parseCSV(text);
-        if (currentParsedItems.length === 0) {
-          alert('Could not find valid items in CSV.');
-          return;
-        }
-
-        renderPreview(currentParsedItems, currentFileName);
+        handleTextData(text, currentFileName, false);
       };
       reader.readAsText(file);
     }
 
-    function renderPreview(items, fileName) {
-      // Hide full dropzone and show compact active file card
-      dropzone.style.display = 'none';
+    function renderPreview(items, fileName, isPasted = false) {
+      // Hide full input container and show compact active data card
+      importInputContainer.style.display = 'none';
       fileCard.style.display = 'flex';
+      if (activeFileIcon) {
+        activeFileIcon.innerHTML = isPasted ? ICONS.clipboard : ICONS.fileText;
+      }
       activeFileName.textContent = `${fileName} (${items.length} items)`;
 
       summarySection.style.display = 'flex';

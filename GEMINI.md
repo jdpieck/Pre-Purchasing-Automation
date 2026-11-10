@@ -36,6 +36,9 @@
 - **Knockout.js Observables**: Dispatched input events must fire both `input` and `change` events on standard text inputs to trigger Knockout view-model recalculations for line subtotals.
 - **jQuery Chosen Dropdowns**: When updating styled selects (`vendor`, `shipAddress`, `approvers`), trigger `.trigger('chosen:updated').trigger('liszt:updated').trigger('change')` and update the visible Chosen single span text.
 
-## 6. CSV Pipeline & Recommended Workflow
-- **8-Column Format**: Columns must remain 1: `Item Name`, 2: `ASIN / Catalog #`, 3: `Qty`, 4: `Price (Unit)`, 5: `Price (Total)`, 6: `Link`, 7: `Vendor`, 8: `Purpose description`.
+## 6. CSV & Spreadsheet Ingestion Pipeline
+- **8-Column Format**: Columns must remain 1: `Item Name`, 2: `ASIN / Catalog #`, 3: `Qty`, 4: `Price (Unit)`, 5: `Price (Total)`, 6: `Link`, 7: `Vendor`, 8: `Purpose description` (headerless or with headers).
+- **Dual Delimiter Support (CSV & TSV)**: The import pipeline must support both standard comma-separated files (`.csv`) and tab-delimited text (`\t`) copied directly from Google Sheets or Excel clipboards.
+- **Quote & Inch Mark Invariant**: E-commerce titles frequently include unescaped inch marks (e.g., `(12.5"x12.5")` or `12" Ruler`). Parsers must only enter quote-delimited string mode when `"` appears at the start of a token, treating internal quotes in unquoted tokens as literal characters so subsequent tab/comma delimiters are never consumed.
+- **Import UI Modalities**: Provide both a file dropzone and a direct paste textarea with subtabs, while supporting zero-click global <kbd>Ctrl+V</kbd> paste detection anywhere on the Import tab.
 - **AMZ Cart Export Workflow**: Officially recommend the [AMZ Cart Export](https://chromewebstore.google.com/detail/amz-cart-export-export-yo/eijailhjjlcfiafgpghlcaoceabflbln) extension for Amazon orders (it provides columns 1–6 automatically; users append column 7 `Vendor` and column 8 `Purpose description`).

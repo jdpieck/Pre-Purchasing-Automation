@@ -189,5 +189,84 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
         proc = subprocess.run(["node", "-e", node_script], cwd=BASE_DIR, capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0, f"Backorder Node simulation failed: {proc.stderr}")
 
+    def test_copy_paste_tsv_node_simulation(self):
+        """Execute Node simulation of parseCSV with Google Sheets copied tab-separated data."""
+        import subprocess
+        node_script = """
+        const fs = require('fs');
+        const code = fs.readFileSync('browser-extension/content.js', 'utf-8');
+
+        // Extract parseCSV function
+        const match = code.match(/function parseCSV\\(text\\)\\s*\\{([\\s\\S]*?)\\n  \\}/);
+        if (!match) {
+          console.error('parseCSV not found');
+          process.exit(1);
+        }
+
+        const parseCSV = new Function('text', match[1]);
+
+        const tsvData = `USANOOKS Microfiber Cleaning Cloth Grey - 12 Pcs (12.5"x12.5") - High Performance - 1200 Washes Ultra Absorbent Microfiber Towel Weave Grime & Liquid for Streak-Free Mirror Shine - Car Washing Cloth\\tB08BRJHJF9\\t1\\t$7.98\\t$7.98\\thttps://www.amazon.com/gp/product/B08BRJHJF9/ref=ox_sc_act_title_1?smid=A3J8SPWK5KKD5E&psc=1\\tAmazon\\tCleaning up the office + general tools
+Schneider Black Nitrile Exam Gloves Box of 100 Latex Free & Powder Free Disposable Gloves for Medical Food Prep & Cleaning Medium\\tB0FBGSPTPP\\t1\\t$7.19\\t$7.19\\thttps://www.amazon.com/gp/product/B0FBGSPTPP/ref=ox_sc_act_title_2?smid=A1UQTBRX1IU1GT&psc=1\\tAmazon\\tCleaning up the office + general tools
+OneLeaf 60Pcs Reusable Cable Ties with Hook and Loop 3 Sizes Wire Ties | Fastening Multi-Purpose Cable Straps Adjustable Cable Management Ties for Organizing Computer/ TV/ Electronics 5 Colors\\tB083FKB7BL\\t1\\t$8.19\\t$8.19\\thttps://www.amazon.com/gp/product/B083FKB7BL/ref=ox_sc_act_title_3?smid=A186T7XWK88CES&psc=1\\tAmazon\\tCleaning up the office + general tools
+Sharpie Permanent Markers Fine Tip Black 12 Count - Quick Drying Fade Resistant For Wood Plastic Paper Metal And More\\tB00006IFHD\\t1\\t$7.00\\t$7.00\\thttps://www.amazon.com/gp/product/B00006IFHD/ref=ox_sc_act_title_4?smid=ATVPDKIKX0DER&psc=1\\tAmazon\\tCleaning up the office + general tools
+Goo Gone Adhesive Remover Spray Gel 12 Oz with Scraper Surface Safe | Citrus Cleaning Power for Hard Surfaces Carpet & Fabric Removes Glue Stickers Tape Residue Grease Gum & Wax Drip Free\\tB0F1DXKQRS\\t1\\t$15.75\\t$15.75\\thttps://www.amazon.com/gp/product/B0F1DXKQRS/ref=ox_sc_act_title_5?smid=A1ZWQ2E5HX10B0&psc=1\\tAmazon\\tCleaning up the office + general tools
+Duck Brand Clean Release Blue Painter's Tape 1.88 in x 60 Yds 3 Rolls | Blue 2 Inch Painters Tape for Painting on Multiple Surfaces Blue Masking Tape 2 inch Wide Clean Removal 180 Total Yards\\tB00L2JOV0I\\t1\\t$18.76\\t$18.76\\thttps://www.amazon.com/gp/product/B00L2JOV0I/ref=ox_sc_act_title_6?smid=ATVPDKIKX0DER&psc=1\\tAmazon\\tCleaning up the office + general tools
+Amazon Basics No Residue Non-Reflective Gaffers Tape for Photography 2 inch x 90 feet Black\\tB07K1WW8WW\\t1\\t$10.49\\t$10.49\\thttps://www.amazon.com/gp/product/B07K1WW8WW/ref=ox_sc_act_title_7?smid=ATVPDKIKX0DER&psc=1\\tAmazon\\tCleaning up the office + general tools
+ScotchBlue Original Multi-Surface Painters Tape 1 Inch Wide (0.94 in. x 60 Yds) 3 Rolls Blue Paint Tape Protects and Removes Easily Masking Tape for Indoor and Outdoor Use (2090-24EC3)\\tB089NYWHJ5\\t1\\t$14.94\\t$14.94\\thttps://www.amazon.com/gp/product/B089NYWHJ5/ref=ox_sc_act_title_8?smid=ATVPDKIKX0DER&psc=1\\tAmazon\\tCleaning up the office + general tools
+M MEEPO 4-Pack Box Cutter Colorful Folding Utility Knife w/ 10 pcs Blades | Tough Design Razor Sharp Blade Comfortable Handle Can cut Drywall Sheet Plastic Linoleum Boxes Rope\\tB09JYJLQXF\\t1\\t$9.99\\t$9.99\\thttps://www.amazon.com/gp/product/B09JYJLQXF/ref=ox_sc_act_title_9?smid=A10BNM4HVCCPTN&psc=1\\tAmazon\\tCleaning up the office + general tools
+Cable Zip Ties400 Pack Black Assorted Sizes 12+8+6+4 InchMulti-Purpose Self-Locking Nylon Cable Cord ManagementPlastic Wire Ties for HomeOfficeGardenWorkshop. By HAVE ME TD\\tB08TVLYB3Q\\t1\\t$6.99\\t$6.99\\thttps://www.amazon.com/gp/product/B08TVLYB3Q/ref=ox_sc_act_title_10?smid=A3QR7MJ9FCPSP7&psc=1\\tAmazon\\tCleaning up the office + general tools`;
+
+        const items = parseCSV(tsvData);
+        if (items.length !== 10) {
+          console.error(`Expected 10 items, got ${items.length}`);
+          process.exit(2);
+        }
+
+        const item0 = items[0];
+        if (!item0.name.includes('Microfiber Cleaning Cloth')) process.exit(3);
+        if (item0.asin !== 'B08BRJHJF9') process.exit(4);
+        if (item0.qty !== 1) process.exit(5);
+        if (item0.unitPrice !== '7.98') process.exit(6);
+        if (item0.totalPrice !== '7.98') process.exit(7);
+        if (!item0.url.includes('B08BRJHJF9')) process.exit(8);
+        if (item0.vendor !== 'Amazon') process.exit(9);
+        if (!item0.purpose.includes('Cleaning up the office')) process.exit(10);
+
+        // Test with headers included
+        const withHeaders = `Item Name\\tASIN / Catalog #\\tQty\\tPrice (Unit)\\tPrice (Total)\\tLink\\tVendor\\tPurpose\\n` + tsvData;
+        const itemsWithHeaders = parseCSV(withHeaders);
+        if (itemsWithHeaders.length !== 10) {
+          console.error(`Expected 10 items with header, got ${itemsWithHeaders.length}`);
+          process.exit(11);
+        }
+
+        // Test quotes/inches inside unquoted item name
+        const inchItem = parseCSV(`12" Heavy Duty Steel Ruler\\tB001XYZ\\t2\\t$15.00\\t$30.00\\thttps://amazon.com\\tAmazon\\tLab tools`)[0];
+        if (inchItem.name !== '12" Heavy Duty Steel Ruler' || inchItem.asin !== 'B001XYZ' || inchItem.qty !== 2) {
+          process.exit(12);
+        }
+
+        process.exit(0);
+        """
+        proc = subprocess.run(["node", "-e", node_script], cwd=BASE_DIR, capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, f"Copy-paste TSV Node simulation failed: {proc.stderr}")
+
+    def test_copy_paste_ui_handlers_and_branding(self):
+        """Verify content.js and userscript include copy-paste components and accessibility attributes."""
+        with open(JS_PATH, 'r', encoding='utf-8') as f:
+            code = f.read()
+
+        self.assertIn("ucd-paste-input", code)
+        self.assertIn("ucd-import-subtabs", code)
+        self.assertIn("handleTextData", code)
+        self.assertIn("clipboard", code)
+        self.assertIn("Paste Spreadsheet", code)
+
+        with open(USERSCRIPT_PATH, 'r', encoding='utf-8') as f:
+            userscript = f.read()
+
+        self.assertIn("ucd-paste-input", userscript)
+        self.assertIn("handleTextData", userscript)
+
 if __name__ == '__main__':
     unittest.main()
