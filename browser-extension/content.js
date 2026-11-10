@@ -668,42 +668,69 @@
 
           <!-- TAB 2: Settings -->
           <div class="ucd-tab-content" id="tab-settings">
-            <p style="font-size: 12px; color: var(--ucd-text-muted); margin: 0 0 14px;">
-              Configure your default order parameters once. They will be saved locally in your browser for all future orders.
-            </p>
+            <div class="ucd-settings-header-banner">
+              <p class="ucd-settings-description">
+                Configure default parameters. Settings auto-save as soon as you leave each field.
+              </p>
+              <span class="ucd-settings-floating-toast" id="ucd-settings-status-top"></span>
+            </div>
             <div class="ucd-form-group">
-              <label>Deliver To Name</label>
+              <div class="ucd-form-label-row">
+                <label>Deliver To Name</label>
+                <span class="ucd-field-saved-badge" data-for="setting-deliverTo">✓ Saved</span>
+              </div>
               <input type="text" id="setting-deliverTo" placeholder="e.g., Your Name" />
             </div>
             <div class="ucd-form-group">
-              <label>Phone Number</label>
+              <div class="ucd-form-label-row">
+                <label>Phone Number</label>
+                <span class="ucd-field-saved-badge" data-for="setting-phone">✓ Saved</span>
+              </div>
               <input type="text" id="setting-phone" placeholder="e.g., (530) 555-0100" />
             </div>
             <div class="ucd-form-group">
-              <label>Email Address</label>
+              <div class="ucd-form-label-row">
+                <label>Email Address</label>
+                <span class="ucd-field-saved-badge" data-for="setting-email">✓ Saved</span>
+              </div>
               <input type="text" id="setting-email" placeholder="e.g., yourkerberos@ucdavis.edu" />
             </div>
             <div class="ucd-form-group">
-              <label>Shipping Address Search Keyword</label>
+              <div class="ucd-form-label-row">
+                <label>Shipping Address Search Keyword</label>
+                <span class="ucd-field-saved-badge" data-for="setting-addressKeyword">✓ Saved</span>
+              </div>
               <input type="text" id="setting-addressKeyword" placeholder="e.g., 1014 A Ghausi Hall" />
               <div class="help-text">Keyword that matches your destination in the shipping address dropdown.</div>
             </div>
             <div class="ucd-form-group">
-              <label>Approver (Kerberos ID or Name)</label>
+              <div class="ucd-form-label-row">
+                <label>Approver (Kerberos ID or Name)</label>
+                <span class="ucd-field-saved-badge" data-for="setting-approver">✓ Saved</span>
+              </div>
               <input type="text" id="setting-approver" placeholder="e.g., jsmith or Approver Name" />
               <div class="help-text">Matches against the workgroup approver list.</div>
             </div>
             <div class="ucd-form-group">
-              <label>Account Manager</label>
+              <div class="ucd-form-label-row">
+                <label>Account Manager</label>
+                <span class="ucd-field-saved-badge" data-for="setting-accountManager">✓ Saved</span>
+              </div>
               <input type="text" id="setting-accountManager" placeholder="anymanager" />
               <div class="help-text">Default: "anymanager" (*Any Workgroup Account Manager*).</div>
             </div>
             <div class="ucd-form-group">
-              <label>Date Needed (Days from Today)</label>
+              <div class="ucd-form-label-row">
+                <label>Date Needed (Days from Today)</label>
+                <span class="ucd-field-saved-badge" data-for="setting-dateOffsetDays">✓ Saved</span>
+              </div>
               <input type="number" id="setting-dateOffsetDays" min="1" max="60" />
             </div>
             <div class="ucd-form-group">
-              <label>Default Units</label>
+              <div class="ucd-form-label-row">
+                <label>Default Units</label>
+                <span class="ucd-field-saved-badge" data-for="setting-unit">✓ Saved</span>
+              </div>
               <select id="setting-unit">
                 <option value="EA">Each (EA)</option>
                 <option value="Box">Box</option>
@@ -712,29 +739,31 @@
               </select>
             </div>
             <div class="ucd-form-group">
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600;">
-                <input type="checkbox" id="setting-allowBackorder" />
-                <span>Allow Backorders</span>
-              </label>
+              <div class="ucd-form-label-row">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; margin: 0;">
+                  <input type="checkbox" id="setting-allowBackorder" />
+                  <span>Allow Backorders</span>
+                </label>
+                <span class="ucd-field-saved-badge" data-for="setting-allowBackorder">✓ Saved</span>
+              </div>
               <div class="help-text">Allow vendors to backorder items if temporarily out of stock (Default: unchecked/No).</div>
             </div>
             <div class="ucd-form-group">
-              <label>Default Justification Fallback</label>
+              <div class="ucd-form-label-row">
+                <label>Default Justification Fallback</label>
+                <span class="ucd-field-saved-badge" data-for="setting-defaultJustification">✓ Saved</span>
+              </div>
               <textarea id="setting-defaultJustification" rows="2" placeholder="e.g., General laboratory research supplies"></textarea>
             </div>
 
             <div class="ucd-settings-actions">
               <div class="ucd-settings-btn-group">
-                <button class="ucd-btn ucd-btn-primary" id="ucd-save-settings-btn">
-                  ${ICONS.save}
-                  <span>Save Settings</span>
+                <button class="ucd-btn ucd-btn-secondary" id="ucd-clear-settings-btn">
+                  ${ICONS.clear}
+                  <span>Clear Settings</span>
                 </button>
                 <span class="ucd-settings-inline-status" id="ucd-settings-status"></span>
               </div>
-              <button class="ucd-btn ucd-btn-secondary" id="ucd-clear-settings-btn">
-                ${ICONS.clear}
-                <span>Clear Settings</span>
-              </button>
             </div>
             <!-- Dedicated scroll spacer to guarantee comfortable bottom clearance -->
             <div class="ucd-tab-footer-spacer"></div>
@@ -845,7 +874,107 @@
     const onboardingBanner = document.getElementById('ucd-onboarding-banner');
     const gotoSettingsBtn = document.getElementById('ucd-goto-settings-btn');
 
+    let settingsStatusTimer = null;
+    function showSettingsStatus(msg, type = 'success') {
+      const statusEls = [
+        document.getElementById('ucd-settings-status'),
+        document.getElementById('ucd-settings-status-top')
+      ].filter(Boolean);
+
+      if (statusEls.length === 0) return;
+
+      statusEls.forEach(el => {
+        el.textContent = msg;
+        const isFloating = el.id === 'ucd-settings-status-top';
+        const baseClass = isFloating ? 'ucd-settings-floating-toast' : 'ucd-settings-inline-status';
+        el.className = `${baseClass} active ${type}`;
+      });
+
+      if (settingsStatusTimer) {
+        clearTimeout(settingsStatusTimer);
+      }
+      settingsStatusTimer = setTimeout(() => {
+        statusEls.forEach(el => {
+          const isFloating = el.id === 'ucd-settings-status-top';
+          el.className = isFloating ? 'ucd-settings-floating-toast' : 'ucd-settings-inline-status';
+          el.textContent = '';
+        });
+        settingsStatusTimer = null;
+      }, 2500);
+    }
+
+    function showFieldSavedBadge(fieldId) {
+      if (!fieldId) return;
+      const badge = root.querySelector(`.ucd-field-saved-badge[data-for="${fieldId}"]`);
+      if (!badge) return;
+      badge.classList.remove('active');
+      void badge.offsetWidth; // Reflow to restart transition
+      badge.classList.add('active');
+      setTimeout(() => {
+        badge.classList.remove('active');
+      }, 1800);
+    }
+
+    function readSettingsFromUI() {
+      const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+      };
+      const daysVal = parseInt(document.getElementById('setting-dateOffsetDays')?.value, 10);
+      return {
+        deliverTo: getVal('setting-deliverTo'),
+        phone: getVal('setting-phone'),
+        email: getVal('setting-email'),
+        addressKeyword: getVal('setting-addressKeyword'),
+        approver: getVal('setting-approver'),
+        accountManager: getVal('setting-accountManager'),
+        dateOffsetDays: Number.isNaN(daysVal) ? 7 : Math.max(1, Math.min(60, daysVal)),
+        unit: document.getElementById('setting-unit')?.value || 'EA',
+        allowBackorder: !!document.getElementById('setting-allowBackorder')?.checked,
+        defaultJustification: getVal('setting-defaultJustification')
+      };
+    }
+
+    function saveCurrentSettings(targetInput = null, notify = true) {
+      const current = readSettingsFromUI();
+      let changed = false;
+      for (const [key, val] of Object.entries(current)) {
+        if (settings[key] !== val) {
+          settings[key] = val;
+          changed = true;
+        }
+      }
+
+      if (changed || !notify) {
+        saveSettings(settings);
+        if (onboardingBanner) {
+          onboardingBanner.style.display = settings.deliverTo ? 'none' : 'flex';
+        }
+      }
+
+      if (notify) {
+        if (targetInput) {
+          targetInput.classList.remove('ucd-input-saved');
+          void targetInput.offsetWidth; // Reflow to restart pulse animation
+          targetInput.classList.add('ucd-input-saved');
+          showFieldSavedBadge(targetInput.id);
+          setTimeout(() => {
+            targetInput.classList.remove('ucd-input-saved');
+          }, 1400);
+        }
+        showSettingsStatus(targetInput ? '✓ Auto-saved' : '✓ Settings saved!', 'success');
+      }
+
+      return changed;
+    }
+
     function switchTab(tabKey) {
+      // Auto-save any pending unsaved changes if leaving the settings tab
+      const currentTab = root.querySelector('.ucd-tab-btn.active')?.dataset.tab;
+      if (currentTab === 'settings' && tabKey !== 'settings') {
+        saveCurrentSettings(null, false);
+      }
+
       const tabBtns = root.querySelectorAll('.ucd-tab-btn');
       const tabContents = root.querySelectorAll('.ucd-tab-content');
       tabBtns.forEach(b => b.classList.remove('active'));
@@ -855,16 +984,6 @@
       if (activeBtn) activeBtn.classList.add('active');
       const activeContent = document.getElementById(`tab-${tabKey}`);
       if (activeContent) activeContent.classList.add('active');
-    }
-
-    function showSettingsStatus(msg, type = 'success') {
-      if (!settingsStatusEl) return;
-      settingsStatusEl.textContent = msg;
-      settingsStatusEl.className = `ucd-settings-inline-status active ${type}`;
-      setTimeout(() => {
-        settingsStatusEl.className = 'ucd-settings-inline-status';
-        settingsStatusEl.textContent = '';
-      }, 3500);
     }
 
     // Toggle Panel
@@ -879,6 +998,7 @@
     });
 
     minimizeBtn.addEventListener('click', () => {
+      saveCurrentSettings(null, false);
       panel.classList.add('hidden');
       launcher.style.display = 'flex';
     });
@@ -913,22 +1033,41 @@
 
     populateSettingsUI();
 
-    // Save Settings Event (inline notification instead of alert dialog)
-    document.getElementById('ucd-save-settings-btn').addEventListener('click', () => {
-      settings.deliverTo = document.getElementById('setting-deliverTo').value.trim();
-      settings.phone = document.getElementById('setting-phone').value.trim();
-      settings.email = document.getElementById('setting-email').value.trim();
-      settings.addressKeyword = document.getElementById('setting-addressKeyword').value.trim();
-      settings.approver = document.getElementById('setting-approver').value.trim();
-      settings.accountManager = document.getElementById('setting-accountManager').value.trim();
-      settings.dateOffsetDays = parseInt(document.getElementById('setting-dateOffsetDays').value, 10) || 7;
-      settings.unit = document.getElementById('setting-unit').value;
-      settings.allowBackorder = document.getElementById('setting-allowBackorder').checked;
-      settings.defaultJustification = document.getElementById('setting-defaultJustification').value.trim();
+    // Auto-save settings on leaving field (blur) or changing value (change)
+    const settingFieldSpecs = [
+      { id: 'setting-deliverTo', key: 'deliverTo', type: 'text' },
+      { id: 'setting-phone', key: 'phone', type: 'text' },
+      { id: 'setting-email', key: 'email', type: 'text' },
+      { id: 'setting-addressKeyword', key: 'addressKeyword', type: 'text' },
+      { id: 'setting-approver', key: 'approver', type: 'text' },
+      { id: 'setting-accountManager', key: 'accountManager', type: 'text' },
+      { id: 'setting-dateOffsetDays', key: 'dateOffsetDays', type: 'number' },
+      { id: 'setting-unit', key: 'unit', type: 'select' },
+      { id: 'setting-allowBackorder', key: 'allowBackorder', type: 'checkbox' },
+      { id: 'setting-defaultJustification', key: 'defaultJustification', type: 'textarea' }
+    ];
 
-      saveSettings(settings);
-      if (onboardingBanner) onboardingBanner.style.display = 'none';
-      showSettingsStatus('✓ Settings saved!', 'success');
+    function handleFieldAutoSave(el, spec) {
+      let currentVal;
+      if (spec.type === 'checkbox') {
+        currentVal = !!el.checked;
+      } else if (spec.type === 'number') {
+        const parsed = parseInt(el.value, 10);
+        currentVal = Number.isNaN(parsed) ? 7 : Math.max(1, Math.min(60, parsed));
+      } else {
+        currentVal = el.value.trim();
+      }
+
+      if (currentVal !== settings[spec.key]) {
+        saveCurrentSettings(el, true);
+      }
+    }
+
+    settingFieldSpecs.forEach(spec => {
+      const el = document.getElementById(spec.id);
+      if (!el) return;
+      el.addEventListener('blur', () => handleFieldAutoSave(el, spec));
+      el.addEventListener('change', () => handleFieldAutoSave(el, spec));
     });
 
     // Clear Settings Event (renamed from Reset Defaults)

@@ -16,7 +16,7 @@
   // Inject CSS Styles
   const styleEl = document.createElement('style');
   styleEl.type = 'text/css';
-  styleEl.textContent = "/* Pre-Purchasing Assistant for UC Davis Extension Styles */\n\n:root {\n  --ucd-blue: #002855;\n  --ucd-blue-light: #023a78;\n  --ucd-gold: #DAAA00;\n  --ucd-gold-dark: #b88d00;\n  --ucd-gold-light: #ffea9f;\n  --ucd-bg: #f8fafc;\n  --ucd-surface: #ffffff;\n  --ucd-border: #e2e8f0;\n  --ucd-text: #1e293b;\n  --ucd-text-muted: #64748b;\n  --ucd-success: #10b981;\n  --ucd-warning: #f59e0b;\n  --ucd-danger: #ef4444;\n}\n\n#ucd-autofill-root {\n  position: fixed;\n  bottom: 24px;\n  right: 24px;\n  z-index: 100000;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n  color: var(--ucd-text);\n  font-size: 14px;\n  line-height: 1.5;\n}\n\n/* Floating Launcher Pill */\n#ucd-autofill-launcher {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  background: var(--ucd-blue);\n  color: #ffffff;\n  padding: 10px 18px;\n  border-radius: 9999px;\n  box-shadow: 0 4px 14px rgba(0, 40, 85, 0.35);\n  cursor: pointer;\n  font-weight: 600;\n  border: 2px solid var(--ucd-gold);\n  transition: all 0.2s ease;\n  user-select: none;\n}\n\n#ucd-autofill-launcher:hover {\n  background: var(--ucd-blue-light);\n  transform: translateY(-2px);\n  box-shadow: 0 6px 18px rgba(0, 40, 85, 0.45);\n}\n\n#ucd-autofill-launcher .launcher-icon {\n  display: flex;\n  align-items: center;\n  color: var(--ucd-gold);\n}\n\n.ucd-launcher-beta-tag {\n  font-size: 10px;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 0.6px;\n  padding: 1px 6px;\n  border-radius: 4px;\n  background: rgba(218, 170, 0, 0.25);\n  color: var(--ucd-gold-light);\n  border: 1px solid rgba(218, 170, 0, 0.45);\n  margin-left: 4px;\n}\n\n/* Main Panel Drawer - Fixed height to eliminate vertical jumping */\n#ucd-autofill-panel {\n  position: fixed;\n  bottom: 24px;\n  right: 24px;\n  width: 490px;\n  height: 620px;\n  max-width: calc(100vw - 48px);\n  max-height: calc(100vh - 48px);\n  background: var(--ucd-surface);\n  border-radius: 14px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1);\n  border: 1px solid var(--ucd-border);\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n  transition: opacity 0.2s ease, transform 0.2s ease;\n}\n\n#ucd-autofill-panel.hidden {\n  display: none !important;\n}\n\n/* Panel Header */\n.ucd-panel-header {\n  background: var(--ucd-blue);\n  color: #ffffff;\n  padding: 14px 18px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 3px solid var(--ucd-gold);\n  flex-shrink: 0;\n}\n\n.ucd-panel-header .title-group {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n\n.ucd-panel-header .title-icon {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  width: 28px;\n  height: 28px;\n  background: rgba(218, 170, 0, 0.2);\n  color: var(--ucd-gold);\n  border-radius: 6px;\n}\n\n.ucd-panel-header h3 {\n  margin: 0;\n  font-size: 15px;\n  font-weight: 700;\n  letter-spacing: 0.25px;\n  color: #ffffff;\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n\n.ucd-beta-badge {\n  display: inline-flex;\n  align-items: center;\n  font-size: 10px;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 0.6px;\n  padding: 1px 6px;\n  border-radius: 4px;\n  background: rgba(218, 170, 0, 0.25);\n  color: var(--ucd-gold-light);\n  border: 1px solid rgba(218, 170, 0, 0.5);\n  vertical-align: middle;\n}\n\n.ucd-header-actions {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n\n.ucd-header-btn {\n  background: rgba(255, 255, 255, 0.12);\n  border: none;\n  color: #ffffff;\n  width: 30px;\n  height: 30px;\n  border-radius: 6px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  cursor: pointer;\n  transition: background 0.15s ease;\n}\n\n.ucd-header-btn:hover {\n  background: rgba(255, 255, 255, 0.25);\n}\n\n/* Tabs Bar */\n.ucd-panel-tabs {\n  display: flex;\n  background: #f1f5f9;\n  border-bottom: 1px solid var(--ucd-border);\n  padding: 8px 12px;\n  gap: 6px;\n  flex-shrink: 0;\n}\n\n.ucd-tab-btn {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  padding: 6px 12px;\n  background: transparent;\n  border: 1px solid transparent;\n  border-radius: 8px;\n  font-size: 13px;\n  font-weight: 600;\n  color: var(--ucd-text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n}\n\n.ucd-tab-btn .tab-icon {\n  display: flex;\n  align-items: center;\n}\n\n.ucd-tab-btn .tab-icon svg {\n  fill: none;\n  stroke: currentColor;\n  transition: stroke 0.15s ease;\n}\n\n.ucd-tab-btn:hover:not(.active) {\n  background: #e2e8f0;\n  color: var(--ucd-text);\n}\n\n/* Active Tab: Highlighted icon + label matching tile styling with rounded box look */\n.ucd-tab-btn.active {\n  color: #0369a1;\n  background: #e0f2fe;\n  border-color: #bae6fd;\n  border-radius: 8px;\n  box-shadow: 0 1px 2px rgba(3, 105, 161, 0.08);\n}\n\n.ucd-tab-btn.active .tab-icon svg {\n  fill: none;\n  stroke: #0369a1;\n}\n\n/* Panel Body - Flex container filling height */\n.ucd-panel-body {\n  padding: 16px 18px;\n  overflow-y: auto;\n  flex: 1;\n  display: flex;\n  flex-direction: column;\n}\n\n.ucd-tab-content {\n  display: none;\n  flex-direction: column;\n  flex: 1;\n  min-height: 0;\n}\n\n.ucd-tab-content.active {\n  display: flex;\n}\n\n/* Onboarding Banner */\n.ucd-onboarding-banner {\n  background: #eff6ff;\n  border: 1px solid #bfdbfe;\n  border-radius: 8px;\n  padding: 12px 14px;\n  margin-bottom: 14px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  font-size: 12px;\n  color: #1e40af;\n  flex-shrink: 0;\n}\n\n.ucd-onboarding-header {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  font-weight: 600;\n}\n\n.ucd-onboarding-btn {\n  align-self: flex-start;\n  padding: 6px 12px;\n  font-size: 11px;\n}\n\n/* Import Input Container & Segmented Subtabs */\n.ucd-import-input-container {\n  display: flex;\n  flex-direction: column;\n  margin-bottom: 8px;\n  flex-shrink: 0;\n}\n\n.ucd-import-subtabs {\n  display: flex;\n  background: #f1f5f9;\n  border-radius: 8px;\n  padding: 3px;\n  gap: 4px;\n  margin-bottom: 12px;\n  border: 1px solid var(--ucd-border);\n}\n\n.ucd-subtab-btn {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 6px;\n  padding: 7px 12px;\n  background: transparent;\n  border: none;\n  border-radius: 6px;\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--ucd-text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n}\n\n.ucd-subtab-btn .subtab-icon {\n  display: flex;\n  align-items: center;\n}\n\n.ucd-subtab-btn .subtab-icon svg {\n  fill: none;\n  stroke: currentColor;\n}\n\n.ucd-subtab-btn:hover:not(.active) {\n  color: var(--ucd-text);\n  background: rgba(255, 255, 255, 0.6);\n}\n\n.ucd-subtab-btn.active {\n  background: #ffffff;\n  color: var(--ucd-blue);\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);\n}\n\n.ucd-subtab-btn.active .subtab-icon svg {\n  stroke: var(--ucd-blue);\n}\n\n.ucd-subview {\n  width: 100%;\n}\n\n.dropzone-subhint {\n  margin-top: 10px;\n  font-size: 11px;\n  color: var(--ucd-blue);\n  background: #eef4ff;\n  display: inline-block;\n  padding: 4px 10px;\n  border-radius: 12px;\n  border: 1px solid #bfdbfe;\n}\n\n/* Direct Paste View */\n.ucd-paste-container {\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n}\n\n.ucd-paste-textarea {\n  width: 100%;\n  height: 160px;\n  box-sizing: border-box;\n  padding: 10px 12px;\n  border: 1px solid #cbd5e1;\n  border-radius: 8px;\n  font-family: inherit;\n  font-size: 12px;\n  line-height: 1.45;\n  color: #1e293b;\n  background: #ffffff;\n  resize: vertical;\n  transition: border-color 0.15s ease, box-shadow 0.15s ease;\n}\n\n.ucd-paste-textarea:focus {\n  outline: none;\n  border-color: var(--ucd-blue);\n  box-shadow: 0 0 0 3px rgba(2, 40, 89, 0.12);\n}\n\n.ucd-paste-actions {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  flex-wrap: wrap;\n}\n\n/* Dropzone (Full size) */\n.ucd-dropzone {\n  border: 2px dashed #cbd5e1;\n  border-radius: 10px;\n  padding: 28px 16px;\n  text-align: center;\n  background: var(--ucd-bg);\n  cursor: pointer;\n  transition: all 0.2s ease;\n}\n\n.ucd-dropzone:hover, .ucd-dropzone.dragover {\n  border-color: var(--ucd-blue);\n  background: #eef4ff;\n}\n\n.ucd-dropzone .dropzone-icon {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: var(--ucd-blue);\n  margin-bottom: 10px;\n}\n\n.ucd-dropzone .dropzone-title {\n  font-weight: 600;\n  color: var(--ucd-blue);\n  margin-bottom: 3px;\n  font-size: 14px;\n}\n\n.ucd-dropzone .dropzone-desc {\n  font-size: 12px;\n  color: var(--ucd-text-muted);\n}\n\n/* Compact Uploaded File Bar (Replaces large dropzone after upload) */\n.ucd-file-active-card {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  background: #f8fafc;\n  border: 1px solid #cbd5e1;\n  border-radius: 8px;\n  padding: 10px 14px;\n  margin-bottom: 8px;\n  gap: 12px;\n  flex-shrink: 0;\n}\n\n.ucd-file-active-info {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  min-width: 0;\n  flex: 1;\n}\n\n.ucd-file-active-icon {\n  color: var(--ucd-blue);\n  display: flex;\n  align-items: center;\n  flex-shrink: 0;\n}\n\n/* File name no longer cuts off early! */\n.ucd-file-name {\n  font-size: 13px;\n  font-weight: 600;\n  color: #1e293b;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  min-width: 0;\n  flex: 1;\n}\n\n.ucd-file-actions {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n\n.ucd-clear-btn {\n  background: #ffffff;\n  border: 1px solid #cbd5e1;\n  color: #475569;\n  font-size: 11px;\n  font-weight: 600;\n  padding: 5px 10px;\n  border-radius: 6px;\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  cursor: pointer;\n  transition: all 0.15s ease;\n}\n\n.ucd-clear-btn:hover {\n  background: #fee2e2;\n  border-color: #fca5a5;\n  color: #dc2626;\n}\n\n/* Summary Badges - Right Justified! */\n.ucd-summary-badges {\n  display: flex;\n  gap: 8px;\n  margin-top: 4px;\n  flex-wrap: wrap;\n  justify-content: flex-end;\n  flex-shrink: 0;\n}\n\n.ucd-badge {\n  background: #e2e8f0;\n  padding: 5px 10px;\n  border-radius: 20px;\n  font-size: 12px;\n  font-weight: 600;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.ucd-badge.blue {\n  background: #e0f2fe;\n  color: #0369a1;\n}\n\n.ucd-badge.gold {\n  background: #fef3c7;\n  color: #92400e;\n}\n\n.ucd-badge.green {\n  background: #dcfce7;\n  color: #15803d;\n}\n\n/* Summary Section container filling remaining height */\n#ucd-summary-section {\n  display: flex;\n  flex-direction: column;\n  flex: 1;\n  min-height: 0;\n}\n\n/* Preview Card - Fills height dynamically! */\n.ucd-preview-card {\n  margin-top: 10px;\n  border: 1px solid var(--ucd-border);\n  border-radius: 8px;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  flex: 1;\n  min-height: 0;\n}\n\n.ucd-preview-header {\n  background: #f8fafc;\n  padding: 8px 12px;\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--ucd-text-muted);\n  display: flex;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--ucd-border);\n  flex-shrink: 0;\n}\n\n.ucd-preview-list {\n  flex: 1;\n  max-height: none;\n  overflow-y: auto;\n  font-size: 12px;\n}\n\n.ucd-preview-row {\n  display: grid;\n  grid-template-columns: 24px 1fr 40px 65px;\n  gap: 8px;\n  padding: 8px 12px;\n  border-bottom: 1px solid #f1f5f9;\n  align-items: center;\n}\n\n.ucd-preview-row:last-child {\n  border-bottom: none;\n}\n\n.ucd-preview-row .item-num {\n  color: var(--ucd-text-muted);\n  font-weight: 600;\n}\n\n.ucd-preview-row .item-desc {\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-weight: 500;\n}\n\n.ucd-preview-row .item-qty {\n  text-align: center;\n  background: #f1f5f9;\n  border-radius: 4px;\n  padding: 2px 4px;\n  font-weight: 600;\n}\n\n.ucd-preview-row .item-price {\n  text-align: right;\n  font-weight: 600;\n  color: #0f172a;\n}\n\n/* Action Button - Pinned cleanly at bottom! */\n.ucd-autofill-btn {\n  width: 100%;\n  margin-top: 12px;\n  background: var(--ucd-blue);\n  color: #ffffff;\n  border: none;\n  padding: 12px 18px;\n  border-radius: 8px;\n  font-size: 14px;\n  font-weight: 700;\n  cursor: pointer;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  box-shadow: 0 4px 12px rgba(0, 40, 85, 0.25);\n  transition: all 0.2s ease;\n  flex-shrink: 0;\n}\n\n.ucd-autofill-btn:hover:not(:disabled) {\n  background: var(--ucd-blue-light);\n  transform: translateY(-1px);\n}\n\n.ucd-autofill-btn:disabled {\n  opacity: 0.5;\n  cursor: not-allowed;\n  box-shadow: none;\n}\n\n/* Status / Progress logs */\n.ucd-status-box {\n  margin-top: 10px;\n  padding: 10px 14px;\n  border-radius: 8px;\n  font-size: 12px;\n  display: none;\n  flex-shrink: 0;\n}\n\n.ucd-status-box.active {\n  display: block;\n}\n\n.ucd-status-box.info {\n  background: #eff6ff;\n  border: 1px solid #bfdbfe;\n  color: #1e40af;\n}\n\n.ucd-status-box.success {\n  background: #ecfdf5;\n  border: 1px solid #a7f3d0;\n  color: #065f46;\n}\n\n.ucd-status-box.error {\n  background: #fef2f2;\n  border: 1px solid #fecaca;\n  color: #991b1b;\n}\n\n/* Settings Form Controls */\n.ucd-form-group {\n  margin-bottom: 12px;\n}\n\n.ucd-form-group label {\n  display: block;\n  font-size: 12px;\n  font-weight: 600;\n  color: #334155;\n  margin-bottom: 4px;\n}\n\n.ucd-form-group input[type=\"text\"],\n.ucd-form-group input[type=\"number\"],\n.ucd-form-group select,\n.ucd-form-group textarea {\n  width: 100%;\n  padding: 8px 10px;\n  border: 1px solid var(--ucd-border);\n  border-radius: 6px;\n  font-size: 13px;\n  box-sizing: border-box;\n  font-family: inherit;\n  transition: border-color 0.15s ease;\n}\n\n.ucd-form-group input[type=\"checkbox\"] {\n  accent-color: var(--ucd-blue);\n  width: 16px;\n  height: 16px;\n  cursor: pointer;\n}\n\n.ucd-form-group input:focus,\n.ucd-form-group select:focus,\n.ucd-form-group textarea:focus {\n  outline: none;\n  border-color: var(--ucd-blue);\n  box-shadow: 0 0 0 2px rgba(0, 40, 85, 0.1);\n}\n\n.ucd-form-group .help-text {\n  font-size: 11px;\n  color: var(--ucd-text-muted);\n  margin-top: 3px;\n}\n\n/* Scrollable Tab Bottom Clearance */\n.ucd-tab-footer-spacer {\n  height: 36px;\n  min-height: 36px;\n  width: 100%;\n  flex-shrink: 0;\n  display: block;\n}\n\n#tab-settings,\n#tab-help {\n  padding-bottom: 8px;\n}\n\n.ucd-settings-actions {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  margin-top: 4px;\n  margin-bottom: 0;\n  flex-shrink: 0;\n}\n\n.ucd-settings-btn-group {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  flex: 1;\n  min-width: 0;\n}\n\n.ucd-settings-inline-status {\n  display: none;\n  align-items: center;\n  font-size: 12px;\n  font-weight: 600;\n  padding: 5px 10px;\n  border-radius: 6px;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  animation: ucdFadeIn 0.2s ease;\n}\n\n@keyframes ucdFadeIn {\n  from { opacity: 0; transform: translateY(2px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n.ucd-settings-inline-status.active {\n  display: inline-flex;\n}\n\n.ucd-settings-inline-status.success {\n  background: #ecfdf5;\n  color: #065f46;\n  border: 1px solid #a7f3d0;\n}\n\n.ucd-settings-inline-status.info {\n  background: #eff6ff;\n  color: #1e40af;\n  border: 1px solid #bfdbfe;\n}\n\n.ucd-btn {\n  padding: 8px 14px;\n  border-radius: 6px;\n  font-size: 13px;\n  font-weight: 600;\n  cursor: pointer;\n  border: none;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  transition: all 0.15s ease;\n}\n\n.ucd-btn svg {\n  fill: none;\n  stroke: currentColor;\n}\n\n.ucd-btn-primary {\n  background: var(--ucd-blue);\n  color: #ffffff;\n}\n\n.ucd-btn-primary:hover {\n  background: var(--ucd-blue-light);\n}\n\n.ucd-btn-secondary {\n  background: #e2e8f0;\n  color: #334155;\n}\n\n.ucd-btn-secondary:hover {\n  background: #cbd5e1;\n}\n\n/* Help Tab Refined Styling */\n.ucd-help-section {\n  display: flex;\n  flex-direction: column;\n  gap: 14px;\n}\n\n.ucd-help-card {\n  background: #ffffff;\n  border: 1px solid var(--ucd-border);\n  border-radius: 8px;\n  padding: 14px 16px;\n}\n\n.ucd-help-card h4 {\n  margin: 0 0 10px;\n  font-size: 13.5px;\n  font-weight: 600;\n  letter-spacing: 0.35px;\n  line-height: 1.45;\n  color: var(--ucd-blue);\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n\n.ucd-step-list {\n  margin: 0;\n  padding: 0;\n  list-style: none;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.ucd-step-item {\n  display: flex;\n  align-items: flex-start;\n  gap: 10px;\n  font-size: 12px;\n  line-height: 1.5;\n  color: #334155;\n}\n\n.ucd-step-num {\n  background: #e0f2fe;\n  color: #0369a1;\n  font-weight: 700;\n  width: 20px;\n  height: 20px;\n  border-radius: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n  font-size: 11px;\n}\n\n.ucd-code-pill {\n  background: #f1f5f9;\n  border: 1px solid #e2e8f0;\n  border-radius: 4px;\n  padding: 2px 6px;\n  font-family: monospace;\n  font-size: 11px;\n  color: #0f172a;\n}\n\n.ucd-credits-card {\n  background: #f8fafc;\n  border: 1px solid #e2e8f0;\n  border-radius: 8px;\n  padding: 14px;\n  font-size: 12px;\n  color: #475569;\n}\n\n.ucd-credits-header {\n  font-size: 13px;\n  font-weight: 600;\n  letter-spacing: 0.35px;\n  line-height: 1.45;\n  color: var(--ucd-blue);\n  margin-bottom: 6px;\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 6px;\n}\n\n.ucd-version-tag {\n  display: inline-block;\n  font-size: 10px;\n  font-weight: 600;\n  letter-spacing: 0.3px;\n  padding: 1px 5px;\n  border-radius: 4px;\n  background: #e0f2fe;\n  color: #0369a1;\n  border: 1px solid #bae6fd;\n  vertical-align: middle;\n}\n\n.ucd-credits-author {\n  font-size: 12px;\n  color: #334155;\n  margin-bottom: 8px;\n  line-height: 1.6;\n}\n\n.ucd-credits-contact-actions {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  margin-top: 8px;\n}\n\n.ucd-contact-link {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  color: #0369a1;\n  text-decoration: none;\n  font-weight: 600;\n  font-size: 12px;\n  padding: 5px 10px;\n  background: #e0f2fe;\n  border-radius: 4px;\n  transition: background 0.15s ease;\n}\n\n.ucd-contact-link:hover {\n  background: #bae6fd;\n}\n\n/* Scrollbar */\n.ucd-panel-body::-webkit-scrollbar,\n.ucd-preview-list::-webkit-scrollbar {\n  width: 6px;\n}\n\n.ucd-panel-body::-webkit-scrollbar-thumb,\n.ucd-preview-list::-webkit-scrollbar-thumb {\n  background: #cbd5e1;\n  border-radius: 3px;\n}\n";
+  styleEl.textContent = "/* Pre-Purchasing Assistant for UC Davis Extension Styles */\n\n:root {\n  --ucd-blue: #002855;\n  --ucd-blue-light: #023a78;\n  --ucd-gold: #DAAA00;\n  --ucd-gold-dark: #b88d00;\n  --ucd-gold-light: #ffea9f;\n  --ucd-bg: #f8fafc;\n  --ucd-surface: #ffffff;\n  --ucd-border: #e2e8f0;\n  --ucd-text: #1e293b;\n  --ucd-text-muted: #64748b;\n  --ucd-success: #10b981;\n  --ucd-warning: #f59e0b;\n  --ucd-danger: #ef4444;\n}\n\n#ucd-autofill-root {\n  position: fixed;\n  bottom: 24px;\n  right: 24px;\n  z-index: 100000;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n  color: var(--ucd-text);\n  font-size: 14px;\n  line-height: 1.5;\n}\n\n/* Floating Launcher Pill */\n#ucd-autofill-launcher {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  background: var(--ucd-blue);\n  color: #ffffff;\n  padding: 10px 18px;\n  border-radius: 9999px;\n  box-shadow: 0 4px 14px rgba(0, 40, 85, 0.35);\n  cursor: pointer;\n  font-weight: 600;\n  border: 2px solid var(--ucd-gold);\n  transition: all 0.2s ease;\n  user-select: none;\n}\n\n#ucd-autofill-launcher:hover {\n  background: var(--ucd-blue-light);\n  transform: translateY(-2px);\n  box-shadow: 0 6px 18px rgba(0, 40, 85, 0.45);\n}\n\n#ucd-autofill-launcher .launcher-icon {\n  display: flex;\n  align-items: center;\n  color: var(--ucd-gold);\n}\n\n.ucd-launcher-beta-tag {\n  font-size: 10px;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 0.6px;\n  padding: 1px 6px;\n  border-radius: 4px;\n  background: rgba(218, 170, 0, 0.25);\n  color: var(--ucd-gold-light);\n  border: 1px solid rgba(218, 170, 0, 0.45);\n  margin-left: 4px;\n}\n\n/* Main Panel Drawer - Fixed height to eliminate vertical jumping */\n#ucd-autofill-panel {\n  position: fixed;\n  bottom: 24px;\n  right: 24px;\n  width: 490px;\n  height: 620px;\n  max-width: calc(100vw - 48px);\n  max-height: calc(100vh - 48px);\n  background: var(--ucd-surface);\n  border-radius: 14px;\n  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1);\n  border: 1px solid var(--ucd-border);\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n  transition: opacity 0.2s ease, transform 0.2s ease;\n}\n\n#ucd-autofill-panel.hidden {\n  display: none !important;\n}\n\n/* Panel Header */\n.ucd-panel-header {\n  background: var(--ucd-blue);\n  color: #ffffff;\n  padding: 14px 18px;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  border-bottom: 3px solid var(--ucd-gold);\n  flex-shrink: 0;\n}\n\n.ucd-panel-header .title-group {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n\n.ucd-panel-header .title-icon {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  width: 28px;\n  height: 28px;\n  background: rgba(218, 170, 0, 0.2);\n  color: var(--ucd-gold);\n  border-radius: 6px;\n}\n\n.ucd-panel-header h3 {\n  margin: 0;\n  font-size: 15px;\n  font-weight: 700;\n  letter-spacing: 0.25px;\n  color: #ffffff;\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n\n.ucd-beta-badge {\n  display: inline-flex;\n  align-items: center;\n  font-size: 10px;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 0.6px;\n  padding: 1px 6px;\n  border-radius: 4px;\n  background: rgba(218, 170, 0, 0.25);\n  color: var(--ucd-gold-light);\n  border: 1px solid rgba(218, 170, 0, 0.5);\n  vertical-align: middle;\n}\n\n.ucd-header-actions {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n\n.ucd-header-btn {\n  background: rgba(255, 255, 255, 0.12);\n  border: none;\n  color: #ffffff;\n  width: 30px;\n  height: 30px;\n  border-radius: 6px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  cursor: pointer;\n  transition: background 0.15s ease;\n}\n\n.ucd-header-btn:hover {\n  background: rgba(255, 255, 255, 0.25);\n}\n\n/* Tabs Bar */\n.ucd-panel-tabs {\n  display: flex;\n  background: #f1f5f9;\n  border-bottom: 1px solid var(--ucd-border);\n  padding: 8px 12px;\n  gap: 6px;\n  flex-shrink: 0;\n}\n\n.ucd-tab-btn {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 6px;\n  padding: 6px 12px;\n  background: transparent;\n  border: 1px solid transparent;\n  border-radius: 8px;\n  font-size: 13px;\n  font-weight: 600;\n  color: var(--ucd-text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n  white-space: nowrap;\n}\n\n.ucd-tab-btn .tab-icon {\n  display: flex;\n  align-items: center;\n}\n\n.ucd-tab-btn .tab-icon svg {\n  fill: none;\n  stroke: currentColor;\n  transition: stroke 0.15s ease;\n}\n\n.ucd-tab-btn:hover:not(.active) {\n  background: #e2e8f0;\n  color: var(--ucd-text);\n}\n\n/* Active Tab: Highlighted icon + label matching tile styling with rounded box look */\n.ucd-tab-btn.active {\n  color: #0369a1;\n  background: #e0f2fe;\n  border-color: #bae6fd;\n  border-radius: 8px;\n  box-shadow: 0 1px 2px rgba(3, 105, 161, 0.08);\n}\n\n.ucd-tab-btn.active .tab-icon svg {\n  fill: none;\n  stroke: #0369a1;\n}\n\n/* Panel Body - Flex container filling height */\n.ucd-panel-body {\n  padding: 16px 18px;\n  overflow-y: auto;\n  flex: 1;\n  display: flex;\n  flex-direction: column;\n}\n\n.ucd-tab-content {\n  display: none;\n  flex-direction: column;\n  flex: 1;\n  min-height: 0;\n}\n\n.ucd-tab-content.active {\n  display: flex;\n}\n\n/* Onboarding Banner */\n.ucd-onboarding-banner {\n  background: #eff6ff;\n  border: 1px solid #bfdbfe;\n  border-radius: 8px;\n  padding: 12px 14px;\n  margin-bottom: 14px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  font-size: 12px;\n  color: #1e40af;\n  flex-shrink: 0;\n}\n\n.ucd-onboarding-header {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  font-weight: 600;\n}\n\n.ucd-onboarding-btn {\n  align-self: flex-start;\n  padding: 6px 12px;\n  font-size: 11px;\n}\n\n/* Import Input Container & Segmented Subtabs */\n.ucd-import-input-container {\n  display: flex;\n  flex-direction: column;\n  margin-bottom: 8px;\n  flex-shrink: 0;\n}\n\n.ucd-import-subtabs {\n  display: flex;\n  background: #f1f5f9;\n  border-radius: 8px;\n  padding: 3px;\n  gap: 4px;\n  margin-bottom: 12px;\n  border: 1px solid var(--ucd-border);\n}\n\n.ucd-subtab-btn {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 6px;\n  padding: 7px 12px;\n  background: transparent;\n  border: none;\n  border-radius: 6px;\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--ucd-text-muted);\n  cursor: pointer;\n  transition: all 0.15s ease;\n}\n\n.ucd-subtab-btn .subtab-icon {\n  display: flex;\n  align-items: center;\n}\n\n.ucd-subtab-btn .subtab-icon svg {\n  fill: none;\n  stroke: currentColor;\n}\n\n.ucd-subtab-btn:hover:not(.active) {\n  color: var(--ucd-text);\n  background: rgba(255, 255, 255, 0.6);\n}\n\n.ucd-subtab-btn.active {\n  background: #ffffff;\n  color: var(--ucd-blue);\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);\n}\n\n.ucd-subtab-btn.active .subtab-icon svg {\n  stroke: var(--ucd-blue);\n}\n\n.ucd-subview {\n  width: 100%;\n}\n\n.dropzone-subhint {\n  margin-top: 10px;\n  font-size: 11px;\n  color: var(--ucd-blue);\n  background: #eef4ff;\n  display: inline-block;\n  padding: 4px 10px;\n  border-radius: 12px;\n  border: 1px solid #bfdbfe;\n}\n\n/* Direct Paste View */\n.ucd-paste-container {\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n}\n\n.ucd-paste-textarea {\n  width: 100%;\n  height: 160px;\n  box-sizing: border-box;\n  padding: 10px 12px;\n  border: 1px solid #cbd5e1;\n  border-radius: 8px;\n  font-family: inherit;\n  font-size: 12px;\n  line-height: 1.45;\n  color: #1e293b;\n  background: #ffffff;\n  resize: vertical;\n  transition: border-color 0.15s ease, box-shadow 0.15s ease;\n}\n\n.ucd-paste-textarea:focus {\n  outline: none;\n  border-color: var(--ucd-blue);\n  box-shadow: 0 0 0 3px rgba(2, 40, 89, 0.12);\n}\n\n.ucd-paste-actions {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  flex-wrap: wrap;\n}\n\n/* Dropzone (Full size) */\n.ucd-dropzone {\n  border: 2px dashed #cbd5e1;\n  border-radius: 10px;\n  padding: 28px 16px;\n  text-align: center;\n  background: var(--ucd-bg);\n  cursor: pointer;\n  transition: all 0.2s ease;\n}\n\n.ucd-dropzone:hover, .ucd-dropzone.dragover {\n  border-color: var(--ucd-blue);\n  background: #eef4ff;\n}\n\n.ucd-dropzone .dropzone-icon {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: var(--ucd-blue);\n  margin-bottom: 10px;\n}\n\n.ucd-dropzone .dropzone-title {\n  font-weight: 600;\n  color: var(--ucd-blue);\n  margin-bottom: 3px;\n  font-size: 14px;\n}\n\n.ucd-dropzone .dropzone-desc {\n  font-size: 12px;\n  color: var(--ucd-text-muted);\n}\n\n/* Compact Uploaded File Bar (Replaces large dropzone after upload) */\n.ucd-file-active-card {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  background: #f8fafc;\n  border: 1px solid #cbd5e1;\n  border-radius: 8px;\n  padding: 10px 14px;\n  margin-bottom: 8px;\n  gap: 12px;\n  flex-shrink: 0;\n}\n\n.ucd-file-active-info {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  min-width: 0;\n  flex: 1;\n}\n\n.ucd-file-active-icon {\n  color: var(--ucd-blue);\n  display: flex;\n  align-items: center;\n  flex-shrink: 0;\n}\n\n/* File name no longer cuts off early! */\n.ucd-file-name {\n  font-size: 13px;\n  font-weight: 600;\n  color: #1e293b;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  min-width: 0;\n  flex: 1;\n}\n\n.ucd-file-actions {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  flex-shrink: 0;\n}\n\n.ucd-clear-btn {\n  background: #ffffff;\n  border: 1px solid #cbd5e1;\n  color: #475569;\n  font-size: 11px;\n  font-weight: 600;\n  padding: 5px 10px;\n  border-radius: 6px;\n  display: flex;\n  align-items: center;\n  gap: 4px;\n  cursor: pointer;\n  transition: all 0.15s ease;\n}\n\n.ucd-clear-btn:hover {\n  background: #fee2e2;\n  border-color: #fca5a5;\n  color: #dc2626;\n}\n\n/* Summary Badges - Right Justified! */\n.ucd-summary-badges {\n  display: flex;\n  gap: 8px;\n  margin-top: 4px;\n  flex-wrap: wrap;\n  justify-content: flex-end;\n  flex-shrink: 0;\n}\n\n.ucd-badge {\n  background: #e2e8f0;\n  padding: 5px 10px;\n  border-radius: 20px;\n  font-size: 12px;\n  font-weight: 600;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.ucd-badge.blue {\n  background: #e0f2fe;\n  color: #0369a1;\n}\n\n.ucd-badge.gold {\n  background: #fef3c7;\n  color: #92400e;\n}\n\n.ucd-badge.green {\n  background: #dcfce7;\n  color: #15803d;\n}\n\n/* Summary Section container filling remaining height */\n#ucd-summary-section {\n  display: flex;\n  flex-direction: column;\n  flex: 1;\n  min-height: 0;\n}\n\n/* Preview Card - Fills height dynamically! */\n.ucd-preview-card {\n  margin-top: 10px;\n  border: 1px solid var(--ucd-border);\n  border-radius: 8px;\n  overflow: hidden;\n  display: flex;\n  flex-direction: column;\n  flex: 1;\n  min-height: 0;\n}\n\n.ucd-preview-header {\n  background: #f8fafc;\n  padding: 8px 12px;\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--ucd-text-muted);\n  display: flex;\n  justify-content: space-between;\n  border-bottom: 1px solid var(--ucd-border);\n  flex-shrink: 0;\n}\n\n.ucd-preview-list {\n  flex: 1;\n  max-height: none;\n  overflow-y: auto;\n  font-size: 12px;\n}\n\n.ucd-preview-row {\n  display: grid;\n  grid-template-columns: 24px 1fr 40px 65px;\n  gap: 8px;\n  padding: 8px 12px;\n  border-bottom: 1px solid #f1f5f9;\n  align-items: center;\n}\n\n.ucd-preview-row:last-child {\n  border-bottom: none;\n}\n\n.ucd-preview-row .item-num {\n  color: var(--ucd-text-muted);\n  font-weight: 600;\n}\n\n.ucd-preview-row .item-desc {\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-weight: 500;\n}\n\n.ucd-preview-row .item-qty {\n  text-align: center;\n  background: #f1f5f9;\n  border-radius: 4px;\n  padding: 2px 4px;\n  font-weight: 600;\n}\n\n.ucd-preview-row .item-price {\n  text-align: right;\n  font-weight: 600;\n  color: #0f172a;\n}\n\n/* Action Button - Pinned cleanly at bottom! */\n.ucd-autofill-btn {\n  width: 100%;\n  margin-top: 12px;\n  background: var(--ucd-blue);\n  color: #ffffff;\n  border: none;\n  padding: 12px 18px;\n  border-radius: 8px;\n  font-size: 14px;\n  font-weight: 700;\n  cursor: pointer;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  box-shadow: 0 4px 12px rgba(0, 40, 85, 0.25);\n  transition: all 0.2s ease;\n  flex-shrink: 0;\n}\n\n.ucd-autofill-btn:hover:not(:disabled) {\n  background: var(--ucd-blue-light);\n  transform: translateY(-1px);\n}\n\n.ucd-autofill-btn:disabled {\n  opacity: 0.5;\n  cursor: not-allowed;\n  box-shadow: none;\n}\n\n/* Status / Progress logs */\n.ucd-status-box {\n  margin-top: 10px;\n  padding: 10px 14px;\n  border-radius: 8px;\n  font-size: 12px;\n  display: none;\n  flex-shrink: 0;\n}\n\n.ucd-status-box.active {\n  display: block;\n}\n\n.ucd-status-box.info {\n  background: #eff6ff;\n  border: 1px solid #bfdbfe;\n  color: #1e40af;\n}\n\n.ucd-status-box.success {\n  background: #ecfdf5;\n  border: 1px solid #a7f3d0;\n  color: #065f46;\n}\n\n.ucd-status-box.error {\n  background: #fef2f2;\n  border: 1px solid #fecaca;\n  color: #991b1b;\n}\n\n/* Settings Form Controls */\n.ucd-form-group {\n  margin-bottom: 12px;\n}\n\n.ucd-form-group label {\n  display: block;\n  font-size: 12px;\n  font-weight: 600;\n  color: #334155;\n  margin-bottom: 4px;\n}\n\n.ucd-form-group input[type=\"text\"],\n.ucd-form-group input[type=\"number\"],\n.ucd-form-group select,\n.ucd-form-group textarea {\n  width: 100%;\n  padding: 8px 10px;\n  border: 1px solid var(--ucd-border);\n  border-radius: 6px;\n  font-size: 13px;\n  box-sizing: border-box;\n  font-family: inherit;\n  transition: border-color 0.15s ease;\n}\n\n.ucd-form-group input[type=\"checkbox\"] {\n  accent-color: var(--ucd-blue);\n  width: 16px;\n  height: 16px;\n  cursor: pointer;\n}\n\n.ucd-form-group input:focus,\n.ucd-form-group select:focus,\n.ucd-form-group textarea:focus {\n  outline: none;\n  border-color: var(--ucd-blue);\n  box-shadow: 0 0 0 2px rgba(0, 40, 85, 0.1);\n}\n\n.ucd-form-group .help-text {\n  font-size: 11px;\n  color: var(--ucd-text-muted);\n  margin-top: 3px;\n}\n\n/* Auto-Save Field Highlight Pulse */\n.ucd-form-group input.ucd-input-saved,\n.ucd-form-group select.ucd-input-saved,\n.ucd-form-group textarea.ucd-input-saved {\n  border-color: #10b981 !important;\n  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;\n  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;\n}\n\n/* Settings Tab Header Banner & Floating Toast (prevents text reflow / layout shift) */\n#tab-settings {\n  position: relative;\n  padding-bottom: 8px;\n}\n\n.ucd-settings-header-banner {\n  position: relative;\n  margin-bottom: 14px;\n}\n\n.ucd-settings-description {\n  font-size: 12px;\n  color: var(--ucd-text-muted);\n  margin: 0;\n  line-height: 1.45;\n  padding-right: 90px;\n}\n\n.ucd-settings-floating-toast {\n  position: absolute;\n  top: -2px;\n  right: 0;\n  display: none;\n  align-items: center;\n  font-size: 11px;\n  font-weight: 600;\n  padding: 2px 8px;\n  border-radius: 9999px;\n  background: #ecfdf5;\n  color: #065f46;\n  border: 1px solid #a7f3d0;\n  white-space: nowrap;\n  pointer-events: none;\n  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.15);\n  animation: ucdFadeIn 0.2s ease;\n}\n\n.ucd-settings-floating-toast.active {\n  display: inline-flex;\n}\n\n.ucd-settings-floating-toast.info {\n  background: #eff6ff;\n  color: #1e40af;\n  border-color: #bfdbfe;\n}\n\n/* Inline Setting Label Row & Save Indicator (Zero-layout-shift) */\n.ucd-form-label-row {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  margin-bottom: 4px;\n  min-height: 18px;\n}\n\n.ucd-form-label-row label {\n  margin-bottom: 0;\n}\n\n.ucd-field-saved-badge {\n  font-size: 11px;\n  font-weight: 600;\n  color: #065f46;\n  background: #ecfdf5;\n  border: 1px solid #a7f3d0;\n  padding: 1px 7px;\n  border-radius: 9999px;\n  opacity: 0;\n  transform: translateY(1px);\n  transition: opacity 0.2s ease, transform 0.2s ease;\n  pointer-events: none;\n}\n\n.ucd-field-saved-badge.active {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n/* Scrollable Tab Bottom Clearance */\n.ucd-tab-footer-spacer {\n  height: 36px;\n  min-height: 36px;\n  width: 100%;\n  flex-shrink: 0;\n  display: block;\n}\n\n#tab-settings,\n#tab-help {\n  padding-bottom: 8px;\n}\n\n.ucd-settings-actions {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  margin-top: 4px;\n  margin-bottom: 0;\n  flex-shrink: 0;\n}\n\n.ucd-settings-btn-group {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  flex: 1;\n  min-width: 0;\n}\n\n.ucd-settings-inline-status {\n  display: none;\n  align-items: center;\n  font-size: 12px;\n  font-weight: 600;\n  padding: 5px 10px;\n  border-radius: 6px;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  animation: ucdFadeIn 0.2s ease;\n}\n\n@keyframes ucdFadeIn {\n  from { opacity: 0; transform: translateY(2px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n.ucd-settings-inline-status.active {\n  display: inline-flex;\n}\n\n.ucd-settings-inline-status.success {\n  background: #ecfdf5;\n  color: #065f46;\n  border: 1px solid #a7f3d0;\n}\n\n.ucd-settings-inline-status.info {\n  background: #eff6ff;\n  color: #1e40af;\n  border: 1px solid #bfdbfe;\n}\n\n.ucd-btn {\n  padding: 8px 14px;\n  border-radius: 6px;\n  font-size: 13px;\n  font-weight: 600;\n  cursor: pointer;\n  border: none;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  transition: all 0.15s ease;\n}\n\n.ucd-btn svg {\n  fill: none;\n  stroke: currentColor;\n}\n\n.ucd-btn-primary {\n  background: var(--ucd-blue);\n  color: #ffffff;\n}\n\n.ucd-btn-primary:hover {\n  background: var(--ucd-blue-light);\n}\n\n.ucd-btn-secondary {\n  background: #e2e8f0;\n  color: #334155;\n}\n\n.ucd-btn-secondary:hover {\n  background: #cbd5e1;\n}\n\n/* Help Tab Refined Styling */\n.ucd-help-section {\n  display: flex;\n  flex-direction: column;\n  gap: 14px;\n}\n\n.ucd-help-card {\n  background: #ffffff;\n  border: 1px solid var(--ucd-border);\n  border-radius: 8px;\n  padding: 14px 16px;\n}\n\n.ucd-help-card h4 {\n  margin: 0 0 10px;\n  font-size: 13.5px;\n  font-weight: 600;\n  letter-spacing: 0.35px;\n  line-height: 1.45;\n  color: var(--ucd-blue);\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n\n.ucd-step-list {\n  margin: 0;\n  padding: 0;\n  list-style: none;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.ucd-step-item {\n  display: flex;\n  align-items: flex-start;\n  gap: 10px;\n  font-size: 12px;\n  line-height: 1.5;\n  color: #334155;\n}\n\n.ucd-step-num {\n  background: #e0f2fe;\n  color: #0369a1;\n  font-weight: 700;\n  width: 20px;\n  height: 20px;\n  border-radius: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n  font-size: 11px;\n}\n\n.ucd-code-pill {\n  background: #f1f5f9;\n  border: 1px solid #e2e8f0;\n  border-radius: 4px;\n  padding: 2px 6px;\n  font-family: monospace;\n  font-size: 11px;\n  color: #0f172a;\n}\n\n.ucd-credits-card {\n  background: #f8fafc;\n  border: 1px solid #e2e8f0;\n  border-radius: 8px;\n  padding: 14px;\n  font-size: 12px;\n  color: #475569;\n}\n\n.ucd-credits-header {\n  font-size: 13px;\n  font-weight: 600;\n  letter-spacing: 0.35px;\n  line-height: 1.45;\n  color: var(--ucd-blue);\n  margin-bottom: 6px;\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 6px;\n}\n\n.ucd-version-tag {\n  display: inline-block;\n  font-size: 10px;\n  font-weight: 600;\n  letter-spacing: 0.3px;\n  padding: 1px 5px;\n  border-radius: 4px;\n  background: #e0f2fe;\n  color: #0369a1;\n  border: 1px solid #bae6fd;\n  vertical-align: middle;\n}\n\n.ucd-credits-author {\n  font-size: 12px;\n  color: #334155;\n  margin-bottom: 8px;\n  line-height: 1.6;\n}\n\n.ucd-credits-contact-actions {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  margin-top: 8px;\n}\n\n.ucd-contact-link {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  color: #0369a1;\n  text-decoration: none;\n  font-weight: 600;\n  font-size: 12px;\n  padding: 5px 10px;\n  background: #e0f2fe;\n  border-radius: 4px;\n  transition: background 0.15s ease;\n}\n\n.ucd-contact-link:hover {\n  background: #bae6fd;\n}\n\n/* Scrollbar */\n.ucd-panel-body::-webkit-scrollbar,\n.ucd-preview-list::-webkit-scrollbar {\n  width: 6px;\n}\n\n.ucd-panel-body::-webkit-scrollbar-thumb,\n.ucd-preview-list::-webkit-scrollbar-thumb {\n  background: #cbd5e1;\n  border-radius: 3px;\n}\n";
   (document.head || document.documentElement).appendChild(styleEl);
 
 /**
@@ -689,42 +689,69 @@
 
           <!-- TAB 2: Settings -->
           <div class="ucd-tab-content" id="tab-settings">
-            <p style="font-size: 12px; color: var(--ucd-text-muted); margin: 0 0 14px;">
-              Configure your default order parameters once. They will be saved locally in your browser for all future orders.
-            </p>
+            <div class="ucd-settings-header-banner">
+              <p class="ucd-settings-description">
+                Configure default parameters. Settings auto-save as soon as you leave each field.
+              </p>
+              <span class="ucd-settings-floating-toast" id="ucd-settings-status-top"></span>
+            </div>
             <div class="ucd-form-group">
-              <label>Deliver To Name</label>
+              <div class="ucd-form-label-row">
+                <label>Deliver To Name</label>
+                <span class="ucd-field-saved-badge" data-for="setting-deliverTo">✓ Saved</span>
+              </div>
               <input type="text" id="setting-deliverTo" placeholder="e.g., Your Name" />
             </div>
             <div class="ucd-form-group">
-              <label>Phone Number</label>
+              <div class="ucd-form-label-row">
+                <label>Phone Number</label>
+                <span class="ucd-field-saved-badge" data-for="setting-phone">✓ Saved</span>
+              </div>
               <input type="text" id="setting-phone" placeholder="e.g., (530) 555-0100" />
             </div>
             <div class="ucd-form-group">
-              <label>Email Address</label>
+              <div class="ucd-form-label-row">
+                <label>Email Address</label>
+                <span class="ucd-field-saved-badge" data-for="setting-email">✓ Saved</span>
+              </div>
               <input type="text" id="setting-email" placeholder="e.g., yourkerberos@ucdavis.edu" />
             </div>
             <div class="ucd-form-group">
-              <label>Shipping Address Search Keyword</label>
+              <div class="ucd-form-label-row">
+                <label>Shipping Address Search Keyword</label>
+                <span class="ucd-field-saved-badge" data-for="setting-addressKeyword">✓ Saved</span>
+              </div>
               <input type="text" id="setting-addressKeyword" placeholder="e.g., 1014 A Ghausi Hall" />
               <div class="help-text">Keyword that matches your destination in the shipping address dropdown.</div>
             </div>
             <div class="ucd-form-group">
-              <label>Approver (Kerberos ID or Name)</label>
+              <div class="ucd-form-label-row">
+                <label>Approver (Kerberos ID or Name)</label>
+                <span class="ucd-field-saved-badge" data-for="setting-approver">✓ Saved</span>
+              </div>
               <input type="text" id="setting-approver" placeholder="e.g., jsmith or Approver Name" />
               <div class="help-text">Matches against the workgroup approver list.</div>
             </div>
             <div class="ucd-form-group">
-              <label>Account Manager</label>
+              <div class="ucd-form-label-row">
+                <label>Account Manager</label>
+                <span class="ucd-field-saved-badge" data-for="setting-accountManager">✓ Saved</span>
+              </div>
               <input type="text" id="setting-accountManager" placeholder="anymanager" />
               <div class="help-text">Default: "anymanager" (*Any Workgroup Account Manager*).</div>
             </div>
             <div class="ucd-form-group">
-              <label>Date Needed (Days from Today)</label>
+              <div class="ucd-form-label-row">
+                <label>Date Needed (Days from Today)</label>
+                <span class="ucd-field-saved-badge" data-for="setting-dateOffsetDays">✓ Saved</span>
+              </div>
               <input type="number" id="setting-dateOffsetDays" min="1" max="60" />
             </div>
             <div class="ucd-form-group">
-              <label>Default Units</label>
+              <div class="ucd-form-label-row">
+                <label>Default Units</label>
+                <span class="ucd-field-saved-badge" data-for="setting-unit">✓ Saved</span>
+              </div>
               <select id="setting-unit">
                 <option value="EA">Each (EA)</option>
                 <option value="Box">Box</option>
@@ -733,29 +760,31 @@
               </select>
             </div>
             <div class="ucd-form-group">
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600;">
-                <input type="checkbox" id="setting-allowBackorder" />
-                <span>Allow Backorders</span>
-              </label>
+              <div class="ucd-form-label-row">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; margin: 0;">
+                  <input type="checkbox" id="setting-allowBackorder" />
+                  <span>Allow Backorders</span>
+                </label>
+                <span class="ucd-field-saved-badge" data-for="setting-allowBackorder">✓ Saved</span>
+              </div>
               <div class="help-text">Allow vendors to backorder items if temporarily out of stock (Default: unchecked/No).</div>
             </div>
             <div class="ucd-form-group">
-              <label>Default Justification Fallback</label>
+              <div class="ucd-form-label-row">
+                <label>Default Justification Fallback</label>
+                <span class="ucd-field-saved-badge" data-for="setting-defaultJustification">✓ Saved</span>
+              </div>
               <textarea id="setting-defaultJustification" rows="2" placeholder="e.g., General laboratory research supplies"></textarea>
             </div>
 
             <div class="ucd-settings-actions">
               <div class="ucd-settings-btn-group">
-                <button class="ucd-btn ucd-btn-primary" id="ucd-save-settings-btn">
-                  ${ICONS.save}
-                  <span>Save Settings</span>
+                <button class="ucd-btn ucd-btn-secondary" id="ucd-clear-settings-btn">
+                  ${ICONS.clear}
+                  <span>Clear Settings</span>
                 </button>
                 <span class="ucd-settings-inline-status" id="ucd-settings-status"></span>
               </div>
-              <button class="ucd-btn ucd-btn-secondary" id="ucd-clear-settings-btn">
-                ${ICONS.clear}
-                <span>Clear Settings</span>
-              </button>
             </div>
             <!-- Dedicated scroll spacer to guarantee comfortable bottom clearance -->
             <div class="ucd-tab-footer-spacer"></div>
@@ -866,7 +895,107 @@
     const onboardingBanner = document.getElementById('ucd-onboarding-banner');
     const gotoSettingsBtn = document.getElementById('ucd-goto-settings-btn');
 
+    let settingsStatusTimer = null;
+    function showSettingsStatus(msg, type = 'success') {
+      const statusEls = [
+        document.getElementById('ucd-settings-status'),
+        document.getElementById('ucd-settings-status-top')
+      ].filter(Boolean);
+
+      if (statusEls.length === 0) return;
+
+      statusEls.forEach(el => {
+        el.textContent = msg;
+        const isFloating = el.id === 'ucd-settings-status-top';
+        const baseClass = isFloating ? 'ucd-settings-floating-toast' : 'ucd-settings-inline-status';
+        el.className = `${baseClass} active ${type}`;
+      });
+
+      if (settingsStatusTimer) {
+        clearTimeout(settingsStatusTimer);
+      }
+      settingsStatusTimer = setTimeout(() => {
+        statusEls.forEach(el => {
+          const isFloating = el.id === 'ucd-settings-status-top';
+          el.className = isFloating ? 'ucd-settings-floating-toast' : 'ucd-settings-inline-status';
+          el.textContent = '';
+        });
+        settingsStatusTimer = null;
+      }, 2500);
+    }
+
+    function showFieldSavedBadge(fieldId) {
+      if (!fieldId) return;
+      const badge = root.querySelector(`.ucd-field-saved-badge[data-for="${fieldId}"]`);
+      if (!badge) return;
+      badge.classList.remove('active');
+      void badge.offsetWidth; // Reflow to restart transition
+      badge.classList.add('active');
+      setTimeout(() => {
+        badge.classList.remove('active');
+      }, 1800);
+    }
+
+    function readSettingsFromUI() {
+      const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+      };
+      const daysVal = parseInt(document.getElementById('setting-dateOffsetDays')?.value, 10);
+      return {
+        deliverTo: getVal('setting-deliverTo'),
+        phone: getVal('setting-phone'),
+        email: getVal('setting-email'),
+        addressKeyword: getVal('setting-addressKeyword'),
+        approver: getVal('setting-approver'),
+        accountManager: getVal('setting-accountManager'),
+        dateOffsetDays: Number.isNaN(daysVal) ? 7 : Math.max(1, Math.min(60, daysVal)),
+        unit: document.getElementById('setting-unit')?.value || 'EA',
+        allowBackorder: !!document.getElementById('setting-allowBackorder')?.checked,
+        defaultJustification: getVal('setting-defaultJustification')
+      };
+    }
+
+    function saveCurrentSettings(targetInput = null, notify = true) {
+      const current = readSettingsFromUI();
+      let changed = false;
+      for (const [key, val] of Object.entries(current)) {
+        if (settings[key] !== val) {
+          settings[key] = val;
+          changed = true;
+        }
+      }
+
+      if (changed || !notify) {
+        saveSettings(settings);
+        if (onboardingBanner) {
+          onboardingBanner.style.display = settings.deliverTo ? 'none' : 'flex';
+        }
+      }
+
+      if (notify) {
+        if (targetInput) {
+          targetInput.classList.remove('ucd-input-saved');
+          void targetInput.offsetWidth; // Reflow to restart pulse animation
+          targetInput.classList.add('ucd-input-saved');
+          showFieldSavedBadge(targetInput.id);
+          setTimeout(() => {
+            targetInput.classList.remove('ucd-input-saved');
+          }, 1400);
+        }
+        showSettingsStatus(targetInput ? '✓ Auto-saved' : '✓ Settings saved!', 'success');
+      }
+
+      return changed;
+    }
+
     function switchTab(tabKey) {
+      // Auto-save any pending unsaved changes if leaving the settings tab
+      const currentTab = root.querySelector('.ucd-tab-btn.active')?.dataset.tab;
+      if (currentTab === 'settings' && tabKey !== 'settings') {
+        saveCurrentSettings(null, false);
+      }
+
       const tabBtns = root.querySelectorAll('.ucd-tab-btn');
       const tabContents = root.querySelectorAll('.ucd-tab-content');
       tabBtns.forEach(b => b.classList.remove('active'));
@@ -876,16 +1005,6 @@
       if (activeBtn) activeBtn.classList.add('active');
       const activeContent = document.getElementById(`tab-${tabKey}`);
       if (activeContent) activeContent.classList.add('active');
-    }
-
-    function showSettingsStatus(msg, type = 'success') {
-      if (!settingsStatusEl) return;
-      settingsStatusEl.textContent = msg;
-      settingsStatusEl.className = `ucd-settings-inline-status active ${type}`;
-      setTimeout(() => {
-        settingsStatusEl.className = 'ucd-settings-inline-status';
-        settingsStatusEl.textContent = '';
-      }, 3500);
     }
 
     // Toggle Panel
@@ -900,6 +1019,7 @@
     });
 
     minimizeBtn.addEventListener('click', () => {
+      saveCurrentSettings(null, false);
       panel.classList.add('hidden');
       launcher.style.display = 'flex';
     });
@@ -934,22 +1054,41 @@
 
     populateSettingsUI();
 
-    // Save Settings Event (inline notification instead of alert dialog)
-    document.getElementById('ucd-save-settings-btn').addEventListener('click', () => {
-      settings.deliverTo = document.getElementById('setting-deliverTo').value.trim();
-      settings.phone = document.getElementById('setting-phone').value.trim();
-      settings.email = document.getElementById('setting-email').value.trim();
-      settings.addressKeyword = document.getElementById('setting-addressKeyword').value.trim();
-      settings.approver = document.getElementById('setting-approver').value.trim();
-      settings.accountManager = document.getElementById('setting-accountManager').value.trim();
-      settings.dateOffsetDays = parseInt(document.getElementById('setting-dateOffsetDays').value, 10) || 7;
-      settings.unit = document.getElementById('setting-unit').value;
-      settings.allowBackorder = document.getElementById('setting-allowBackorder').checked;
-      settings.defaultJustification = document.getElementById('setting-defaultJustification').value.trim();
+    // Auto-save settings on leaving field (blur) or changing value (change)
+    const settingFieldSpecs = [
+      { id: 'setting-deliverTo', key: 'deliverTo', type: 'text' },
+      { id: 'setting-phone', key: 'phone', type: 'text' },
+      { id: 'setting-email', key: 'email', type: 'text' },
+      { id: 'setting-addressKeyword', key: 'addressKeyword', type: 'text' },
+      { id: 'setting-approver', key: 'approver', type: 'text' },
+      { id: 'setting-accountManager', key: 'accountManager', type: 'text' },
+      { id: 'setting-dateOffsetDays', key: 'dateOffsetDays', type: 'number' },
+      { id: 'setting-unit', key: 'unit', type: 'select' },
+      { id: 'setting-allowBackorder', key: 'allowBackorder', type: 'checkbox' },
+      { id: 'setting-defaultJustification', key: 'defaultJustification', type: 'textarea' }
+    ];
 
-      saveSettings(settings);
-      if (onboardingBanner) onboardingBanner.style.display = 'none';
-      showSettingsStatus('✓ Settings saved!', 'success');
+    function handleFieldAutoSave(el, spec) {
+      let currentVal;
+      if (spec.type === 'checkbox') {
+        currentVal = !!el.checked;
+      } else if (spec.type === 'number') {
+        const parsed = parseInt(el.value, 10);
+        currentVal = Number.isNaN(parsed) ? 7 : Math.max(1, Math.min(60, parsed));
+      } else {
+        currentVal = el.value.trim();
+      }
+
+      if (currentVal !== settings[spec.key]) {
+        saveCurrentSettings(el, true);
+      }
+    }
+
+    settingFieldSpecs.forEach(spec => {
+      const el = document.getElementById(spec.id);
+      if (!el) return;
+      el.addEventListener('blur', () => handleFieldAutoSave(el, spec));
+      el.addEventListener('change', () => handleFieldAutoSave(el, spec));
     });
 
     // Clear Settings Event (renamed from Reset Defaults)

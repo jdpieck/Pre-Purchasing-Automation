@@ -90,10 +90,36 @@ class TestPrePurchasingAutoFill(unittest.TestCase):
         self.assertIn("setBackorderState", code)
         self.assertIn("showSettingsStatus", code)
         self.assertIn("clear-settings", code)
+        self.assertIn("handleFieldAutoSave", code)
+        self.assertIn("saveCurrentSettings", code)
         self.assertIn("jdpieck.github.io", code)
         self.assertIn("gemini.google.com", code)
         self.assertIn("github.com/jdpieck/Pre-Purchasing-Automation/issues", code)
         self.assertIn("jdpieck@ucdavis.edu", code)
+
+    def test_tabs_span_and_settings_autosave(self):
+        """Verify tab buttons span full width and settings auto-save is implemented in CSS and JS."""
+        css_path = os.path.join(BASE_DIR, 'browser-extension', 'styles.css')
+        with open(css_path, 'r', encoding='utf-8') as f:
+            css = f.read()
+
+        tab_btn_match = re.search(r'\.ucd-tab-btn\s*\{([^}]+)\}', css)
+        self.assertIsNotNone(tab_btn_match, ".ucd-tab-btn must exist in styles.css")
+        tab_rules = tab_btn_match.group(1)
+        self.assertIn("flex: 1", tab_rules, ".ucd-tab-btn must have flex: 1 to span full horizontal space")
+        self.assertIn("justify-content: center", tab_rules, ".ucd-tab-btn must have justify-content: center")
+
+        self.assertIn(".ucd-input-saved", css, "Must define .ucd-input-saved visual feedback style in styles.css")
+        self.assertIn(".ucd-field-saved-badge", css, "Must define .ucd-field-saved-badge in styles.css")
+        self.assertIn(".ucd-settings-floating-toast", css, "Must define .ucd-settings-floating-toast in styles.css")
+
+        with open(JS_PATH, 'r', encoding='utf-8') as f:
+            js = f.read()
+
+        self.assertIn("handleFieldAutoSave", js, "Auto-save handler must exist in content.js")
+        self.assertIn("showFieldSavedBadge", js, "showFieldSavedBadge function must exist in content.js")
+        self.assertIn("addEventListener('blur'", js, "Must bind blur event for text inputs in content.js")
+        self.assertIn("addEventListener('change'", js, "Must bind change event in content.js")
 
     def test_dual_packaging_sync(self):
         """Verify standalone userscript is in sync with content.js and manifest version."""

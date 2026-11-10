@@ -23,7 +23,10 @@
 ## 4. UI Architecture & Icon Rules
 - **Lucide Iconography**: Use Lucide SVG icons (`lucide.dev`).
 - **No Fill on Line Icons**: Never apply `fill: currentColor` to Lucide SVG icons; they are stroke-based. Use `fill: none; stroke: currentColor;`.
-- **Tab Bar Styling**: Active tabs use a rounded tile/badge style (`background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 8px;`) matching the summary badges on the import tab, without bottom underline borders.
+- **Tab Bar Styling**: Active tabs use a rounded tile/badge style (`background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 8px;`) matching the summary badges on the import tab, without bottom underline borders. Tab buttons in `.ucd-panel-tabs` must span the full horizontal width (`flex: 1; justify-content: center; white-space: nowrap;`) rather than clumping on the left.
+- **Auto-Save & Zero Layout Shift (CLS)**:
+  - Settings inputs and form controls must auto-save on `blur` (text inputs) and `change` (checkboxes, selects); do not require a redundant manual "Save Settings" button.
+  - Ephemeral save status notifications must never cause layout shift or text reflow. Use dedicated label rows (`.ucd-form-label-row`) with fixed `min-height` and opacity transitions for inline field badges, and out-of-flow absolute positioning (`position: absolute; right: 0;`) with reserved text clearance (`padding-right`) for floating banners.
 - **Chromium Overflow Scrolling Fix**: In Chromium/WebKit, flex containers with `overflow-y: auto` drop `padding-bottom` and child bottom margins at the scroll limit. Always include an in-flow DOM spacer `<div class="ucd-tab-footer-spacer"></div>` with `height: 36px; min-height: 36px; flex-shrink: 0;` at the bottom of scrollable tabs to guarantee clearance above drawer edges.
 - **Header Typography & Letter-Spacing**: Card and sub-section headers (e.g. `.ucd-help-card h4`, `.ucd-credits-header`) must use `font-weight: 600` and positive `letter-spacing: 0.35px` with `line-height: 1.45` to prevent letter collision and glyph squishing on Windows system fonts.
 

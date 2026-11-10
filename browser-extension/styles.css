@@ -182,8 +182,10 @@
 }
 
 .ucd-tab-btn {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 6px 12px;
   background: transparent;
@@ -194,6 +196,7 @@
   color: var(--ucd-text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .ucd-tab-btn .tab-icon {
@@ -716,6 +719,95 @@
   margin-top: 3px;
 }
 
+/* Auto-Save Field Highlight Pulse */
+.ucd-form-group input.ucd-input-saved,
+.ucd-form-group select.ucd-input-saved,
+.ucd-form-group textarea.ucd-input-saved {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* Settings Tab Header Banner & Floating Toast (prevents text reflow / layout shift) */
+#tab-settings {
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.ucd-settings-header-banner {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.ucd-settings-description {
+  font-size: 12px;
+  color: var(--ucd-text-muted);
+  margin: 0;
+  line-height: 1.45;
+  padding-right: 90px;
+}
+
+.ucd-settings-floating-toast {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  display: none;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.15);
+  animation: ucdFadeIn 0.2s ease;
+}
+
+.ucd-settings-floating-toast.active {
+  display: inline-flex;
+}
+
+.ucd-settings-floating-toast.info {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+/* Inline Setting Label Row & Save Indicator (Zero-layout-shift) */
+.ucd-form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  min-height: 18px;
+}
+
+.ucd-form-label-row label {
+  margin-bottom: 0;
+}
+
+.ucd-field-saved-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  opacity: 0;
+  transform: translateY(1px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.ucd-field-saved-badge.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Scrollable Tab Bottom Clearance */
 .ucd-tab-footer-spacer {
   height: 36px;
@@ -733,7 +825,6 @@
 .ucd-settings-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   margin-top: 4px;
   margin-bottom: 0;
